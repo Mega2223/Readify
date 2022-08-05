@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="aguaLib">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../aguaLib/artifacts/aguaLib_jar/aguaLib.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
