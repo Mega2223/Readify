@@ -8,19 +8,23 @@ public class StringSelectionWindow extends JFrame {
     private JPanel panel;
     String[] selection;
     public JCheckBox boxes[];
+    JButton confirmationButton = new JButton("Done!");
+
     public StringSelectionWindow(String initialPrompt, String[] array){
         setVisible(true);
         setSize(400,300);
         setLayout(new FlowLayout());
 
-        panel = new JPanel(new GridLayout(array.length+1,1));
+        panel = new JPanel(new GridLayout(array.length+2,1));
 
         selection = array;
         panel.add(new JLabel(initialPrompt));
         add(panel);
         createCheckboxes();
-
+        add(confirmationButton);
     }
+
+
 
     void createCheckboxes(){
         boxes = new JCheckBox[selection.length];

@@ -10,6 +10,8 @@ import net.mega2223.readify.util.Misc;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
@@ -31,14 +33,14 @@ public class ApplicationWindow extends JFrame {
     public JLabel stats = new JLabel();
     public JLabel statsInfo = new JLabel();
     public JMenuBar jMenuBar = new JMenuBar();
-    public JMenu importer = new JMenu("Import");
-    public JMenuItem fromUserHistory = new JMenuItem("From user history");
-    public JMenuItem fromPlaylist = new JMenuItem("From playlist");
-    public JMenuItem clearSharedSongList = new JMenuItem("Clear songs");
-    public JMenu visuals = new JMenu("Visuals");
-    public JMenuItem specificArtistGraphics = new JMenuItem("Generate graphic from a set of artists");
-    public JMenuItem specificSongGraphics = new JMenuItem("Generate graphic from a specific set of songs");
-    public JMenuItem generateFromOverallListeningTime = new JMenuItem("Generate graphic from overall listening time");
+     public JMenu importer = new JMenu("Import");
+      public JMenuItem fromUserHistory = new JMenuItem("From user history");
+      public JMenuItem fromPlaylist = new JMenuItem("From playlist");
+      public JMenuItem clearSharedSongList = new JMenuItem("Clear songs");
+     public JMenu visuals = new JMenu("Visuals");
+      public JMenuItem specificArtistGraphics = new JMenuItem("Generate graphic from a set of artists");
+      public JMenuItem specificSongGraphics = new JMenuItem("Generate graphic from a specific set of songs");
+      public JMenuItem generateFromOverallListeningTime = new JMenuItem("Generate graphic from overall listening time");
 
     public ApplicationWindow(int sX, int sY) {
 
@@ -50,9 +52,8 @@ public class ApplicationWindow extends JFrame {
             for (int i = 0; i < files.length; i++) {
                 //generates song estimate based on size of all arrays from all selected files
                 File act = files[i];
-
-
-                /* this is too slow loltry {
+                /* this is too slow lol
+                try {
                     songEstimate += JsonParser.parseString(Misc.readFromFile(act)).getAsJsonArray().size();
                 } catch (IOException ex) {
                     ex.printStackTrace();
@@ -62,12 +63,16 @@ public class ApplicationWindow extends JFrame {
 
             JLabel updateStatus = new JLabel("Loading songs...");
             JProgressBar progressBar = new JProgressBar(0,fileSizeEstimate);
+            JPanel panel = new JPanel(new GridLayout(1,4));
+            panel.add(updateStatus);
+            panel.add(progressBar);
+
             final int[] counts = {0,0};
             Thread loadingThread = new Thread(() -> {
                 for (int i = 0; i < files.length; i++) {
                     File act = files[i];
                     try {
-                        stats.setText("Loading files...");
+                        stats.setText("Loading file "+ act.getName() +"...");
                         String fileData = Misc.readFromFile(act, () -> {
                             progressBar.setValue(counts[1]);
                             updateStatus.setText("Estimated progress: " + (int)((double)counts[1]/(double)fileSizeEstimate*100) + "%");
@@ -79,21 +84,20 @@ public class ApplicationWindow extends JFrame {
                             updateStatus.setText("Estimated progress: " + (int) ((double) counts[0] / (double) songEstimate * 100) + "%");
                             counts[0]++;
                         }, () -> {
-                            remove(progressBar);
-                            remove(updateStatus);
-                            stats.setText(" ");
+
                         });
                         sharedSongHistory.loadSongs(tracks);
                     } catch (IOException | ParseException ex) {
                         ex.printStackTrace();
                         JOptionPane.showMessageDialog(ApplicationWindow.this, "Something happened :(, see the log for more details");
                     }
-                    refreshSongStats();
                 }
-            });
+                remove(panel);
 
-            add(updateStatus);
-            add(progressBar);
+                stats.setText(" ");
+                refreshSongStats();
+            });
+            add(panel);
             loadingThread.start();
             //remove(updateStatus);
             //remove(progressBar);
@@ -150,6 +154,15 @@ public class ApplicationWindow extends JFrame {
                     + songNumber + " minutes listened.";
             repor = HTMLize(repor);
             statsInfo.setText(repor);
+        });
+        specificArtistGraphics.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                List<String> artists = sharedSongHistory.getArtists();
+                String arr[] = new String[artists.size()];
+                artists.toArray(arr);
+                StringSelectionWindow artistSelectionWindow = new StringSelectionWindow("Select the artists that you wish to visually represent:",arr);
+            }
         });
 
         visuals.add(specificArtistGraphics);
