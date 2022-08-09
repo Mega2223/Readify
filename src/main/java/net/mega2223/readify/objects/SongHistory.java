@@ -95,6 +95,19 @@ public class SongHistory implements Iterable{
         return out;
     }
 
+    public SongHistory getSongsFromArtist(String artistName){
+        SongHistory ret = new SongHistory();
+
+        for (int i = 0; i < tracks.size(); i++) {
+            Track act = tracks.get(i);
+            System.out.println(act.artistName + "==" + artistName);
+            if(act.artistName.equals(artistName)){ret.loadSong(act);System.out.println("adicionando");}
+
+        }
+
+        return ret;
+    }
+
     @Override
     public Iterator iterator() {
         return tracks.iterator();
@@ -154,5 +167,6 @@ public class SongHistory implements Iterable{
         return (date.after(Date.from(before))&&date.before(Date.from(after)));
 
     }
+
 
 }

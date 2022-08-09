@@ -2,31 +2,33 @@ package net.mega2223.readify.windows;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class StringSelectionWindow extends JFrame {
 
-    private JPanel panel;
+
     String[] selection;
     public JCheckBox boxes[];
-    JButton confirmationButton = new JButton("Done!");
+    public JButton confirmationButton = new JButton("Done!");
 
     public StringSelectionWindow(String initialPrompt, String[] array){
-        setVisible(true);
-        setSize(400,300);
-        setLayout(new FlowLayout());
-
-        panel = new JPanel(new GridLayout(array.length+2,1));
-
+        JPanel panel = new JPanel(new GridLayout(array.length+2,1));
+        JScrollPane scroll = new JScrollPane(panel);
         selection = array;
         panel.add(new JLabel(initialPrompt));
-        add(panel);
-        createCheckboxes();
-        add(confirmationButton);
+        createCheckboxes(panel);
+        add(scroll);
+        //panel.add(confirmationButton);
+        panel.add(confirmationButton);
+        setVisible(true);
+
+        pack();
     }
 
 
 
-    void createCheckboxes(){
+    void createCheckboxes(JPanel panel){
         boxes = new JCheckBox[selection.length];
         for (int i = 0; i < selection.length; i++) {
             String act = selection[i];
@@ -44,4 +46,13 @@ public class StringSelectionWindow extends JFrame {
         return results;
     }
 
+    public List<String> getSelected(){
+        ArrayList ret = new ArrayList<>();
+        for (int i = 0; i < boxes.length; i++) {
+            if(boxes[i].isSelected()){
+                ret.add(selection[i]);
+            }
+        }
+        return ret;
+    }
 }

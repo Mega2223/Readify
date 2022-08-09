@@ -1,8 +1,11 @@
 package net.mega2223.readify.util;
 
+import java.awt.*;
 import java.io.*;
 
 public class Misc {
+
+    public static final Color PREFERRED_COLORS[] = {Color.BLUE,Color.RED,Color.GREEN,Color.CYAN,Color.MAGENTA,Color.YELLOW};
 
     public static String readFromFile(File file) throws IOException {return readFromFile(file,null);}
 
