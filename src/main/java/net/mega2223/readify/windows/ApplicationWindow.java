@@ -18,13 +18,15 @@ import java.util.Date;
 import java.util.List;
 
 import static net.mega2223.readify.objects.SongHistory.isInDateRange;
+import static net.mega2223.readify.util.Misc.HTMLize;
 
 public class ApplicationWindow extends JFrame {
 
     //TODO: different states for if we are using songs from a playlist or from a user history or perhaps both, along with global variables
     //such is needed because playlists and user histories display different info
 
-    public static final Color[] PREFERED_COLORS = {Color.RED, Color.BLUE};
+    public static final int[] DEFAULT_GRAPH_DIMENSIONS = {300,300};
+
     public SongHistory sharedSongHistory = new SongHistory();
     public JPanel statusCanvas = new JPanel();
     public JMenuBar jMenuBar = new JMenuBar();
@@ -134,7 +136,7 @@ public class ApplicationWindow extends JFrame {
             list.add(individualListeiningSessionsData);
             list.add(milisListenedData);
 
-            GraphRenderer renderer = new GraphRenderer(list, new Dimension(300, 300), PREFERED_COLORS);
+            GraphRenderer renderer = new GraphRenderer(list, new Dimension(DEFAULT_GRAPH_DIMENSIONS[0], DEFAULT_GRAPH_DIMENSIONS[1]), Misc.PREFERRED_COLORS);
 
             double songNumber = 1000;
 
@@ -232,12 +234,6 @@ public class ApplicationWindow extends JFrame {
         setVisible(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-    }
-
-    public static String HTMLize(String what) {
-        String ret = "<html><body>" + what + "</body></html>";
-        ret = ret.replace("\n", "<br>");
-        return ret;
     }
 
     public double inputDouble(String message) {

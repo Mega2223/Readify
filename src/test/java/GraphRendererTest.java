@@ -1,5 +1,6 @@
 import net.Mega2223.utils.ImageTools;
 import net.Mega2223.utils.objects.GraphRenderer;
+import net.mega2223.readify.util.Misc;
 import net.mega2223.readify.windows.ApplicationWindow;
 
 import javax.swing.*;
@@ -21,7 +22,7 @@ public class GraphRendererTest {
         db.add(new double[]{3,4});
         db.add(new double[]{4,1});
 
-        GraphRenderer graphRenderer = new GraphRenderer(d,new Dimension(30,10), ApplicationWindow.PREFERED_COLORS);
+        GraphRenderer graphRenderer = new GraphRenderer(d,new Dimension(30,10), Misc.PREFERRED_COLORS);
 
         JFrame frame = new JFrame();
         frame.setSize(100,100);

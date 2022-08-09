@@ -1,3 +1,4 @@
+import net.mega2223.readify.util.Misc;
 import net.mega2223.readify.windows.ApplicationWindow;
 
 import javax.swing.*;
@@ -26,7 +27,7 @@ public class ScrollTest extends JFrame {
             big += "\n";
         }
 
-        JLabel label = new JLabel(ApplicationWindow.HTMLize(big));
+        JLabel label = new JLabel(Misc.HTMLize(big));
         label.setFont(Font.decode("Consolas"));
 
         JPanel panel = new JPanel();

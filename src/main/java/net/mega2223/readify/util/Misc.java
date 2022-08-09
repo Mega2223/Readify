@@ -33,4 +33,10 @@ public class Misc {
 
     }
 
+    public static String HTMLize(String what) {
+        String ret = "<html><body>" + what + "</body></html>";
+        ret = ret.replace("\n", "<br>");
+        return ret;
+    }
+
 }
