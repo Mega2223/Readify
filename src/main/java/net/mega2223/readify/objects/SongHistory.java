@@ -100,8 +100,7 @@ public class SongHistory implements Iterable{
 
         for (int i = 0; i < tracks.size(); i++) {
             Track act = tracks.get(i);
-            System.out.println(act.artistName + "==" + artistName);
-            if(act.artistName.equals(artistName)){ret.loadSong(act);System.out.println("adicionando");}
+            if(act.artistName.equals(artistName)){ret.loadSong(act);}
 
         }
 

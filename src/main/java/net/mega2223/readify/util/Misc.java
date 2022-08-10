@@ -2,6 +2,7 @@ package net.mega2223.readify.util;
 
 import java.awt.*;
 import java.io.*;
+import java.util.List;
 
 public class Misc {
 
@@ -37,6 +38,22 @@ public class Misc {
         String ret = "<html><body>" + what + "</body></html>";
         ret = ret.replace("\n", "<br>");
         return ret;
+    }
+
+    public static void debugGraphData(List<List<double[]>> graphData){
+
+        System.out.println("DATA DEBUG:");
+
+        for (int i = 0; i < graphData.size(); i++) {
+            List<double[]> act = graphData.get(i);
+            String out = i + ": [";
+            for (int j = 0; j < act.size(); j++) {
+                double[] actAct = act.get(j);
+                out += "{" + actAct[0] + ";" + actAct[1] + "}/";
+            }
+            out += "]";
+            System.out.println(out+"\n");
+        }
     }
 
 }
