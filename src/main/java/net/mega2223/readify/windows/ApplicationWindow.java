@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -136,6 +137,7 @@ public class ApplicationWindow extends JFrame {
         specificArtistGraphics.addActionListener(e -> {
             List<String> artists = songHistory.getArtists();
             String arr[] = new String[artists.size()];
+            Collections.sort(artists);
             artists.toArray(arr);
             StringSelectionWindow artistSelectionWindow = new StringSelectionWindow("Select the artists that you wish to visually represent:", arr);
             artistSelectionWindow.confirmationButton.addActionListener(e1 -> {
@@ -159,6 +161,23 @@ public class ApplicationWindow extends JFrame {
                     Date old = songHistory.getOldest().getEndTime();
                     Date nu = songHistory.getNewest().getEndTime();
 
+                    Color doubleColors[] = new Color[Misc.PREFERRED_COLORS.length*2];
+
+                    for (int i = 0; i < Misc.PREFERRED_COLORS.length; i+=2) {
+                        Color act = Misc.PREFERRED_COLORS[i];
+                        doubleColors[i] = act;
+                        int r = act.getRed();
+                        int g = act.getGreen();
+                        int b = act.getBlue();
+                        System.out.println(r + " " + g + " " + b);
+                        r*=0.5;
+                        g*=0.5;
+                        b*=0.5;
+                        System.out.println(r + " " + g + " " + b);
+                        System.out.println();
+                        doubleColors[i+1]=new Color(r,g,b);
+                    }
+
                     for (int i = 0; i < histories.size(); i++) {
                         data.addAll(genRendererBasedOnTimeSpan(histories.get(i),wideInSecs));
                     }
@@ -166,13 +185,14 @@ public class ApplicationWindow extends JFrame {
                     statusCanvas.removeAll();
                     statusCanvas.add(stats);
 
-                    GraphRenderer renderer = new GraphRenderer(data, new Dimension(600,600),Misc.PREFERRED_COLORS);
+                    GraphRenderer renderer = new GraphRenderer(data, new Dimension(600,600), doubleColors);
                     stats.setIcon(new ImageIcon(renderer.renderWithGrid(new ArrayList<>(),new double[]{100,365})));//fixme
                     stats.setText("All data from the selected artists between " + old + " and " + nu);
                 });
                 });
 
         });
+
 
         statusCanvas.add(new JLabel("Welcome :), no songs currently loaded"));
 
@@ -207,6 +227,7 @@ public class ApplicationWindow extends JFrame {
     public void refreshSongStats() {
         statusCanvas.removeAll();
         statusCanvas.add(new JLabel(generateStatReport(true)));
+        invalidate();
     }
 
     public String generateStatReport(boolean html) {
