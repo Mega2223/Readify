@@ -10,7 +10,7 @@ If you want do do a contribution or want me to work on a feature, feel free to [
 
 ### 2.1 Getting your data: 
 
-First things first, you will need said Json files containing your private info, you can either [make an automated request in your profile settings page](https://www.spotify.com/ca-en/account/privacy/) which will give you all your spotify activity **over the last year**, or you can [mail spotify support](mailto:mail:support@spotify.com) in order to get your full spotify history since your account was created, Stats.fm has [a very good and easy to follow guide](https://support.stats.fm/docs/import/) onto how to do this properly.
+First things first, you will need said Json files containing your private info, you can either [make an automated request in your profile settings page](https://www.spotify.com/ca-en/account/privacy/) which will give you all your spotify activity **over the last year**, or you can [mail spotify support](mailto:mail:support@spotify.com) in order to get your full spotify history since your account was created, Stats.fm has [a very good and easy to follow guide](https://support.stats.fm/docs/import/streaming-history) onto how to do this properly.
 Upon making a request, it will take some days for Spotify to compile it all, when the process is completed, they shall send you an email alerting you that your data is available for download.
 
 ### 2.2 Loading your data:
