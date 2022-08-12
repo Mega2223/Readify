@@ -1,6 +1,6 @@
 package net.mega2223.readify.windows;
 
-import net.Mega2223.utils.objects.GraphRenderer;
+import net.mega2223.utils.objects.GraphRenderer;
 import net.mega2223.readify.objects.SongHistory;
 import net.mega2223.readify.objects.Track;
 import net.mega2223.readify.util.JsonConverter;
@@ -62,9 +62,10 @@ public class ApplicationWindow extends JFrame {
             statusCanvas.add(stats);
             JLabel updateStatus = new JLabel("Loading songs...");
             JProgressBar progressBar = new JProgressBar(0, fileSizeEstimate);
-            JPanel panel = new JPanel(new GridLayout(1, 4));
+            JPanel panel = new JPanel(new GridLayout(2, 1));
             panel.add(updateStatus);
             panel.add(progressBar);
+            pack();
 
             final int[] counts = {0, 0};
             Thread loadingThread = new Thread(() -> {
@@ -94,7 +95,8 @@ public class ApplicationWindow extends JFrame {
                 remove(panel);
                 refreshSongStats();
             });
-            add(panel);
+            statusCanvas.add(panel);
+            pack();
             loadingThread.start();
         });
         clearSharedSongList.addActionListener(e -> {
@@ -121,6 +123,8 @@ public class ApplicationWindow extends JFrame {
                 JLabel stats = new JLabel();
                 statusCanvas.add(stats);
 
+                stats.setVerticalTextPosition(SwingConstants.BOTTOM);
+                stats.setHorizontalTextPosition(SwingConstants.CENTER);
                 stats.setIcon(new ImageIcon(renderer.renderWithGrid(new ArrayList<>(), grid)));
                 String repor = "All songs you listened during the span from " + old + " to " + nu +
                         ".\nEach vertical line represents roughly one month. \nEach horizontal block surpassed by the red line represents a sum of "
@@ -130,6 +134,8 @@ public class ApplicationWindow extends JFrame {
                         + songNumber + " minutes listened.";
                 repor = HTMLize(repor);
                 stats.setText(repor);
+                pack();
+                invalidate();
             });
 
 
@@ -207,7 +213,7 @@ public class ApplicationWindow extends JFrame {
         jMenuBar.add(importer);
         jMenuBar.add(visuals);
 
-        GridLayout layout = new GridLayout(1,1);
+        BorderLayout layout = new BorderLayout(3,3);
         //layout.setAlignment(FlowLayout.CENTER);
         setLayout(layout);
 

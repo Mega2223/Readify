@@ -1,5 +1,5 @@
-import net.Mega2223.utils.ImageTools;
-import net.Mega2223.utils.objects.GraphRenderer;
+import net.mega2223.utils.ImageTools;
+import net.mega2223.utils.objects.GraphRenderer;
 import net.mega2223.readify.util.Misc;
 import net.mega2223.readify.windows.ApplicationWindow;
 
