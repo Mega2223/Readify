@@ -100,3 +100,6 @@ This application uses the [Maven Assembly Plugin](https://maven.apache.org/plugi
     </build>
 ```
     
+# 4 Special thanks
+### [PudimAtômico](https://github.com/PudimAtomico) for the banger name and for hating me.
+### [Ezenere](https://github.com/ezenere) for feedback and discussing flight simulators with me when no one else wants to.
