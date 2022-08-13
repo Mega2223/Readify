@@ -20,7 +20,6 @@ import java.util.List;
 
 import static net.mega2223.readify.objects.SongHistory.isInDateRange;
 import static net.mega2223.readify.util.Misc.HTMLize;
-import static net.mega2223.readify.util.Misc.debugGraphData;
 
 public class ApplicationWindow extends JFrame {
 
@@ -123,7 +122,6 @@ public class ApplicationWindow extends JFrame {
             TimeSpanSelector sel = new TimeSpanSelector();
             sel.addConclusionTask(() -> {
                 List list = genRendererDataBasedOnTimeSpan(songHistory,sel.getTimeInSeconds());
-                debugGraphData(list);
                 sel.dispose();
 
                 Date old = songHistory.getOldest().getEndTime();
@@ -206,6 +204,9 @@ public class ApplicationWindow extends JFrame {
                     statusCanvas.removeAll();
                     statusCanvas.add(stats);
 
+                    System.out.println(doubleColors.length + " colors");
+                    System.out.println(data.size() + " lines");
+
                     GraphRenderer renderer = new GraphRenderer(data, new Dimension(600,600), doubleColors);
                     stats.setIcon(new ImageIcon(renderer.renderWithGridAndNumberNotation(new ArrayList<>(),new double[]{100,365})));//fixme
                     stats.setText("All data from the selected artists between " + old + " and " + nu);
@@ -285,18 +286,20 @@ public class ApplicationWindow extends JFrame {
         return chooser.getSelectedFiles();
     }
     public static List<List<double[]>> genRendererDataBasedOnTimeSpan(SongHistory songHistory, double loopFrequencyInSeconds){
-        return genRendererDataBasedOnTimeSpan(new SongHistory[]{songHistory},loopFrequencyInSeconds);
+        ArrayList l = new ArrayList();
+        l.add(songHistory);
+        return genRendererDataBasedOnTimeSpan(l,loopFrequencyInSeconds);
     }
-    public static List<List<double[]>> genRendererDataBasedOnTimeSpan(SongHistory[] songHistories, double loopFrequencyInSeconds){
+    public static List<List<double[]>> genRendererDataBasedOnTimeSpan(List<SongHistory> songHistories, double loopFrequencyInSeconds){
 
-        Date old = songHistories[0].getOldest().getEndTime();
-        Date nu = songHistories[0].getNewest().getEndTime();
+        Date old = songHistories.get(0).getOldest().getEndTime();
+        Date nu = songHistories.get(0).getNewest().getEndTime();
 
-        for (int i = 1; i < songHistories.length; i++) {
+        for (int i = 1; i < songHistories.size(); i++) {
             //gets the oldest and newest songs from all songhistories and selects the oldest oldest, and newest newest respecively
             //thanks CGPGray for making the above sentence acceptable
-            Date oldestEndTime = songHistories[i].getOldest().getEndTime();
-            Date newestEndTime = songHistories[i].getNewest().getEndTime();
+            Date oldestEndTime = songHistories.get(i).getOldest().getEndTime();
+            Date newestEndTime = songHistories.get(i).getNewest().getEndTime();
             if(old.after(oldestEndTime)){
                 old = oldestEndTime;
             }
@@ -309,10 +312,14 @@ public class ApplicationWindow extends JFrame {
 
         List<List<double[]>> overallData = new ArrayList();
 
-        for (int l = 0; l < songHistories.length; l++) {
-            SongHistory songHistory = songHistories[l];
+
+
+        for (int l = 0; l < songHistories.size(); l++) {
+            SongHistory songHistory = songHistories.get(l);
             ArrayList<double[]> individualListeiningSessionsData = new ArrayList();
             ArrayList<double[]> minutesListenedData = new ArrayList();
+            overallData.add(individualListeiningSessionsData);
+            overallData.add(minutesListenedData);
             for (Date dateAct = (Date) old.clone(); dateAct.before(nu);
                 //goes checking each day if wideness = 1;
                  dateAct = Date.from(Instant.ofEpochSecond((long) (dateAct.toInstant().getEpochSecond() + loopFrequencyInSeconds)))) {
@@ -331,13 +338,10 @@ public class ApplicationWindow extends JFrame {
                 individualListeiningSessionsData.add(new double[]{dateItnerations, ls});
                 minutesListenedData.add(new double[]{dateItnerations, msls / 1000 / 60});
 
-                overallData.add(individualListeiningSessionsData);
-                overallData.add(minutesListenedData);
-
                 dateItnerations++;
             }
         }
-
+        System.out.println(overallData.size() + " lines overall");
         return overallData;
     }
 
