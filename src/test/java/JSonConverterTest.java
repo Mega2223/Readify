@@ -17,7 +17,7 @@ public class JSonConverterTest {
             nextLine = reader.readLine();
         }
 
-        System.out.println(JsonConverter.convertFromUserHistory(sampleString));
+        System.out.println(JsonConverter.convertFromStreamingHistoryFormat(sampleString));
 
 
     }

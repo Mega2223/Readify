@@ -33,11 +33,11 @@ public class ApplicationWindow extends JFrame {
     public JPanel statusCanvas = new JPanel();
     public JMenuBar jMenuBar = new JMenuBar();
      public JMenu importer = new JMenu("Import");
-      public JMenuItem fromUserHistory = new JMenuItem("From user history");
-      public JMenuItem fromPlaylist = new JMenuItem("From playlist");
+      public JMenuItem fromUserHistory = new JMenuItem("From StreamHistory files");
+      public JMenuItem fromEndSong = new JMenuItem("From EndSongFiles");
       public JMenuItem clearSharedSongList = new JMenuItem("Clear songs");
      public JMenu visuals = new JMenu("Visuals");
-      public JMenuItem specificArtistGraphics = new JMenuItem("Generate graphic from a set of artists");
+      public JMenuItem specificArtistGraphs = new JMenuItem("Generate graphic from a set of artists");
       public JMenuItem specificSongGraphics = new JMenuItem("Generate graphic from a specific set of songs");
       public JMenuItem generateFromOverallListeningTime = new JMenuItem("Generate graphic from overall listening time");
 
@@ -47,16 +47,16 @@ public class ApplicationWindow extends JFrame {
             File[] files = importFiles();
             int songEstimate = files.length * 10000;
             int fileSizeEstimate = songEstimate * 6;
-            for (int i = 0; i < files.length; i++) {
+            /*for (int i = 0; i < files.length; i++) {
                 //generates song estimate based on size of all arrays from all selected files
                 File act = files[i];
-                /* this is too slow lol
+                 this is too slow lol
                 try {
                     songEstimate += JsonParser.parseString(Misc.readFromFile(act)).getAsJsonArray().size();
                 } catch (IOException ex) {
                     ex.printStackTrace();
-                }*/
-            }
+                }
+            }*/
             JLabel stats = new JLabel();
             statusCanvas.removeAll();
             statusCanvas.add(stats);
@@ -79,7 +79,7 @@ public class ApplicationWindow extends JFrame {
                             counts[1]++;
                         });
                         stats.setText("Compiling songs...");
-                        SongHistory tracks = JsonConverter.convertFromUserHistory(fileData, () -> {
+                        SongHistory tracks = JsonConverter.convertFromStreamingHistoryFormat(fileData, () -> {
                             progressBar.setValue(counts[0]);
                             updateStatus.setText("Estimated progress: " + (int) ((double) counts[0] / (double) songEstimate * 100) + "%");
                             counts[0]++;
@@ -96,8 +96,23 @@ public class ApplicationWindow extends JFrame {
                 refreshSongStats();
             });
             statusCanvas.add(panel);
-            pack();
             loadingThread.start();
+        });
+        fromEndSong.addActionListener(e -> {
+            File[] files = importFiles();
+            for (int i = 0; i < files.length; i++) {
+                File act = files[i];
+                try {
+                    String data = Misc.readFromFile(act);
+                    SongHistory history = JsonConverter.convertFromEndSongFormat(data);
+                    songHistory.loadSongs(history);
+                    refreshSongStats();
+                } catch (IOException | ParseException ex) {
+                    ex.printStackTrace();
+                }
+
+            }
+
         });
         clearSharedSongList.addActionListener(e -> {
             songHistory.clearSongs();
@@ -107,7 +122,7 @@ public class ApplicationWindow extends JFrame {
         generateFromOverallListeningTime.addActionListener(e -> {
             TimeSpanSelector sel = new TimeSpanSelector();
             sel.addConclusionTask(() -> {
-                List list = genRendererBasedOnTimeSpan(songHistory,sel.getTimeInSeconds());
+                List list = genRendererDataBasedOnTimeSpan(songHistory,sel.getTimeInSeconds());
                 debugGraphData(list);
                 sel.dispose();
 
@@ -125,7 +140,7 @@ public class ApplicationWindow extends JFrame {
 
                 stats.setVerticalTextPosition(SwingConstants.BOTTOM);
                 stats.setHorizontalTextPosition(SwingConstants.CENTER);
-                stats.setIcon(new ImageIcon(renderer.renderWithGrid(new ArrayList<>(), grid)));
+                stats.setIcon(new ImageIcon(renderer.renderWithGridAndNumberNotation(new ArrayList<>(), grid)));
                 String repor = "All songs you listened during the span from " + old + " to " + nu +
                         ".\nEach vertical line represents roughly one month. \nEach horizontal block surpassed by the red line represents a sum of "
                         + songNumber +
@@ -140,7 +155,7 @@ public class ApplicationWindow extends JFrame {
 
 
         });
-        specificArtistGraphics.addActionListener(e -> {
+        specificArtistGraphs.addActionListener(e -> {
             List<String> artists = songHistory.getArtists();
             String arr[] = new String[artists.size()];
             Collections.sort(artists);
@@ -175,24 +190,24 @@ public class ApplicationWindow extends JFrame {
                         int r = act.getRed();
                         int g = act.getGreen();
                         int b = act.getBlue();
-                        System.out.println(r + " " + g + " " + b);
+                        //System.out.println(r + " " + g + " " + b);
                         r*=0.5;
                         g*=0.5;
                         b*=0.5;
-                        System.out.println(r + " " + g + " " + b);
-                        System.out.println();
+                        //System.out.println(r + " " + g + " " + b);
+                        //System.out.println();
                         doubleColors[i+1]=new Color(r,g,b);
                     }
 
                     for (int i = 0; i < histories.size(); i++) {
-                        data.addAll(genRendererBasedOnTimeSpan(histories.get(i),wideInSecs));
+                        data.addAll(genRendererDataBasedOnTimeSpan(histories.get(i),wideInSecs));
                     }
                     JLabel stats = new JLabel();
                     statusCanvas.removeAll();
                     statusCanvas.add(stats);
 
                     GraphRenderer renderer = new GraphRenderer(data, new Dimension(600,600), doubleColors);
-                    stats.setIcon(new ImageIcon(renderer.renderWithGrid(new ArrayList<>(),new double[]{100,365})));//fixme
+                    stats.setIcon(new ImageIcon(renderer.renderWithGridAndNumberNotation(new ArrayList<>(),new double[]{100,365})));//fixme
                     stats.setText("All data from the selected artists between " + old + " and " + nu);
                 });
                 });
@@ -202,11 +217,11 @@ public class ApplicationWindow extends JFrame {
 
         statusCanvas.add(new JLabel("Welcome :), no songs currently loaded"));
 
-        visuals.add(specificArtistGraphics);
+        visuals.add(specificArtistGraphs);
         visuals.add(specificSongGraphics);
         visuals.add(generateFromOverallListeningTime);
 
-        importer.add(fromPlaylist);
+        importer.add(fromEndSong);
         importer.add(fromUserHistory);
         importer.add(clearSharedSongList);
 
@@ -269,39 +284,61 @@ public class ApplicationWindow extends JFrame {
         chooser.showOpenDialog(this);
         return chooser.getSelectedFiles();
     }
+    public static List<List<double[]>> genRendererDataBasedOnTimeSpan(SongHistory songHistory, double loopFrequencyInSeconds){
+        return genRendererDataBasedOnTimeSpan(new SongHistory[]{songHistory},loopFrequencyInSeconds);
+    }
+    public static List<List<double[]>> genRendererDataBasedOnTimeSpan(SongHistory[] songHistories, double loopFrequencyInSeconds){
 
-    public static ArrayList<ArrayList<double[]>> genRendererBasedOnTimeSpan(SongHistory songHistory,double loopFrequencyInSeconds){
-        Date old = songHistory.getOldest().getEndTime();
-        Date nu = songHistory.getNewest().getEndTime();
-        int dateItnerations = 0;
+        Date old = songHistories[0].getOldest().getEndTime();
+        Date nu = songHistories[0].getNewest().getEndTime();
 
-        ArrayList individualListeiningSessionsData = new ArrayList();
-        ArrayList milisListenedData = new ArrayList();
-
-        for (Date dateAct = (Date) old.clone(); dateAct.before(nu);
-            //goes checking each day if wideness = 1;
-             dateAct = Date.from(Instant.ofEpochSecond((long) (dateAct.toInstant().getEpochSecond() + loopFrequencyInSeconds)))) {
-            //measurement of individual listens
-            int ls = 0;
-            //measurement of milis listened
-            long msls = 0;
-            List<Track> listens = songHistory.getListens();
-            for (int i = 0; i < listens.size(); i++) {
-                Track act = listens.get(i);
-                if (isInDateRange(act.getEndTime(), dateAct, loopFrequencyInSeconds/60/60/24)) {
-                    ls++;
-                    msls += act.getMsPlayed();
-                }
+        for (int i = 1; i < songHistories.length; i++) {
+            //gets the oldest and newest songs from all songhistories and selects the oldest oldest, and newest newest respecively
+            //thanks CGPGray for making the above sentence acceptable
+            Date oldestEndTime = songHistories[i].getOldest().getEndTime();
+            Date newestEndTime = songHistories[i].getNewest().getEndTime();
+            if(old.after(oldestEndTime)){
+                old = oldestEndTime;
             }
-            individualListeiningSessionsData.add(new double[]{dateItnerations, ls});
-            milisListenedData.add(new double[]{dateItnerations, msls / 1000 / 60});
-            dateItnerations++;
+            if(nu.before(newestEndTime)){
+                nu = newestEndTime;
+            }
         }
 
-        ArrayList list = new ArrayList();
-        list.add(individualListeiningSessionsData);
-        list.add(milisListenedData);
-        return list;
+        int dateItnerations = 0;
+
+        List<List<double[]>> overallData = new ArrayList();
+
+        for (int l = 0; l < songHistories.length; l++) {
+            SongHistory songHistory = songHistories[l];
+            ArrayList<double[]> individualListeiningSessionsData = new ArrayList();
+            ArrayList<double[]> minutesListenedData = new ArrayList();
+            for (Date dateAct = (Date) old.clone(); dateAct.before(nu);
+                //goes checking each day if wideness = 1;
+                 dateAct = Date.from(Instant.ofEpochSecond((long) (dateAct.toInstant().getEpochSecond() + loopFrequencyInSeconds)))) {
+                //measurement of individual listens
+                int ls = 0;
+                //measurement of milis listened
+                long msls = 0;
+                List<Track> listens = songHistory.getListens();
+                for (int i = 0; i < listens.size(); i++) {
+                    Track act = listens.get(i);
+                    if (isInDateRange(act.getEndTime(), dateAct, loopFrequencyInSeconds / 60 / 60 / 24)) {
+                        ls++;
+                        msls += act.getMsPlayed();
+                    }
+                }
+                individualListeiningSessionsData.add(new double[]{dateItnerations, ls});
+                minutesListenedData.add(new double[]{dateItnerations, msls / 1000 / 60});
+
+                overallData.add(individualListeiningSessionsData);
+                overallData.add(minutesListenedData);
+
+                dateItnerations++;
+            }
+        }
+
+        return overallData;
     }
 
 }

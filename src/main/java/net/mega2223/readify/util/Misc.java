@@ -26,12 +26,42 @@ public class Misc {
         return sampleString;
     }
     public static String adaptDate(String previous){
-        //2022-04-26 11:05 -> 26/04/2022 12:41
+        if(previous.contains("T")){return adaptDateEndSong(previous);}
+        return adaptDateStreamingHistory(previous);
+    }
+
+    static String adaptDateStreamingHistory(String previous){
+        //2022-04-26 11:05 -> 26/04/2022 10:05
         String pa1[] = previous.split(" ");
         String pa2[] = pa1[0].split("-");
-
         return pa2[2] + "/" + pa2[1] + "/" + pa2[0] + " " + pa1[1];
+    }
+    static String adaptDateEndSong(String previous){
+        //2019-06-11T12:30:46Z -> 11/06/2019 12:30
+        String pa1[] = previous.split("T");
+        String pa11[] = pa1[0].split("-");
+        String pa12[] = pa1[1].split(":");
 
+
+        return pa11[2] + "/" + pa11[1] + "/" + pa11[0] + " " + pa12[0] + ":" + pa12[1];
+
+    }
+
+    public static void debugGraph(List<List<double[]>> data){
+        System.out.println("GRAPH_DEBUG: ");
+        for (int i = 0; i < data.size(); i++) {
+            debugGraphBar(data.get(i));
+        }
+        System.out.println();
+    }
+    public static void debugGraphBar(List<double[]> data){
+        String debug = "[";
+        for (int i = 0; i < data.size(); i++) {
+            double[] point = data.get(i);
+            debug += "(" +point[0] + "," + point[1] + ")";
+        }
+        debug += "]";
+        System.out.println(debug);
     }
 
     public static String HTMLize(String what) {

@@ -2,6 +2,11 @@
 <project version="4">
   <component name="RemoteRepositoriesConfiguration">
     <remote-repository>
+      <option name="id" value="net.mega2223.aguaLib" />
+      <option name="name" value="net.mega2223.aguaLib" />
+      <option name="url" value="https://github.com/Mega2223/aguaLib/releases/aguaLib-1.2.0.jar" />
+    </remote-repository>
+    <remote-repository>
       <option name="id" value="central" />
       <option name="name" value="Central Repository" />
       <option name="url" value="https://repo.maven.apache.org/maven2" />
