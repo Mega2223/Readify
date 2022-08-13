@@ -53,16 +53,9 @@ If the report reflects your data, then congrats, you successfully loaded your da
 This repo requires two Maven dependencies to work, [GSON](https://github.com/google/gson) and [AguaLib](https://github.com/Mega2223/aguaLib/), a personal lib that is responsible for rendering the graphs.  
 Here is what your pom.xml should absolutely have in order for the application to work:
   ```xml
-  <repositories>
-        <repository>
-            <id>net.mega2223.aguaLib</id>
-            <url>https://github.com/Mega2223/aguaLib/releases/aguaLib-1.1.0.jar</url>
-        </repository>
-  </repositories>
-
-    <dependencies>
+  <dependencies>
         <dependency>
-            <groupId>com.google.code.gson</groupId>
+           <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.9.1</version>
         </dependency>
@@ -70,10 +63,9 @@ Here is what your pom.xml should absolutely have in order for the application to
         <dependency>
             <groupId>net.mega2223</groupId>
             <artifactId>aguaLib</artifactId>
-            <version>1.1.0</version>
+            <version>1.2.0</version>
         </dependency>
-    </dependencies>
-  
+  </dependencies>
   ```
     
 ### 3.2 Builiding an executable jar
