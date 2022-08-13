@@ -62,6 +62,14 @@ public class TimeSpanSelector extends JFrame {
         return timeAmount * selected.durationInSeconds;
     }
 
+    public AcceptedTimeUnit getSelectedTimeUnit(){
+        return (AcceptedTimeUnit) timeUnitSelector.getSelectedValue();
+    }
+
+    public double getTimeInSelectedTimeUnit(){
+        return Double.parseDouble(timeInput.getText());
+    }
+
     protected static class AcceptedTimeUnit{
         public String timeUnit;
         public double durationInSeconds;

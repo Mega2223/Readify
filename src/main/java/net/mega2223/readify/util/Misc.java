@@ -1,7 +1,9 @@
 package net.mega2223.readify.util;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.BitSet;
 import java.util.List;
 
 public class Misc {
@@ -45,6 +47,14 @@ public class Misc {
 
         return pa11[2] + "/" + pa11[1] + "/" + pa11[0] + " " + pa12[0] + ":" + pa12[1];
 
+    }
+
+    public static BufferedImage generateMonochromaticImage(int sX, int sY, Color color){
+        BufferedImage image = new BufferedImage(sX,sY,BufferedImage.TYPE_4BYTE_ABGR);
+        Graphics graphics = image.getGraphics();
+        graphics.setColor(color);
+        graphics.fillRect(0,0,sX,sY);
+        return image;
     }
 
     public static void debugGraph(List<List<double[]>> data){

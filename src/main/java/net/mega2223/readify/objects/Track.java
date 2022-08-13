@@ -55,4 +55,14 @@ public class Track {
     public void setMsPlayed(int msPlayed) {
         this.msPlayed = msPlayed;
     }
+
+    @Override
+    public String toString() {
+        return "Track{" +
+                "trackName='" + trackName + '\'' +
+                ", artistName='" + artistName + '\'' +
+                ", endTime=" + endTime +
+                ", msPlayed=" + msPlayed +
+                '}';
+    }
 }
