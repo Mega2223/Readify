@@ -23,7 +23,7 @@ Most of these are irrelevant for us, the ones you need to look for are those:
 
 ![CutFiles](https://user-images.githubusercontent.com/59067466/184044205-8ee75663-64bd-4e99-955d-60e00a624ad8.png) 
 
-The quantity of StreamingHistory files largely depends on the quantity of songs you listened, soon as you located those, open the application and you may see a screen like this:
+The quantity of files largely depends on the quantity of songs you listened, soon as you located those, open the application and you may see a screen like this:
 
 ![StartScreen](https://user-images.githubusercontent.com/59067466/184047705-df7fc44d-2931-4533-974f-98db054c43b7.png)
 
@@ -100,6 +100,6 @@ This application uses the [Maven Assembly Plugin](https://maven.apache.org/plugi
     </build>
 ```
     
-# 4 Special thanks
-### [PudimAtômico](https://github.com/PudimAtomico) for the banger name and for hating me.
-### [Ezenere](https://github.com/ezenere) for feedback and discussing flight simulators with me when no one else wants to.
+## 4 Special thanks
+#### [PudimAtômico](https://github.com/PudimAtomico) for the banger name and for hating me.
+#### [Ezenere](https://github.com/ezenere) for feedback and discussing flight simulators with me when no one else wants to.
