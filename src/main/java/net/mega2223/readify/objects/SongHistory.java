@@ -1,10 +1,9 @@
 package net.mega2223.readify.objects;
 
+import java.awt.*;
 import java.time.Instant;
 import java.time.temporal.TemporalField;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
+import java.util.*;
 import java.util.List;
 
 public class SongHistory implements Iterable{
@@ -154,6 +153,54 @@ public class SongHistory implements Iterable{
             }
         }
         return r;
+    }
+
+    public int getTimeListenedForArtistInSeconds(String artist){
+        List<Track> songs = getSongsFromArtist(artist).getSongs();
+        int count = 0;
+        for (Track act : songs){
+            count += act.msPlayed/1000;
+        }
+        return count;
+    }
+
+    public List<String> sortBasedOnArtistPopularity(List<String> artists){
+        class ComparableArtist implements Comparable{
+            public int sortingCriteria;
+            public String artist;
+            public ComparableArtist(String artist, int sortingCriteria){this.artist = artist; this.sortingCriteria = sortingCriteria;}
+            public int compareTo(Object o) {
+                if(o instanceof ComparableArtist){
+                    return sortingCriteria - ((ComparableArtist) o).sortingCriteria;
+                }
+                return 0;
+            }
+            @Override
+            public String toString() {
+                return "ComparableArtist{" +
+                        "sortingCriteria=" + sortingCriteria +
+                        ", artist='" + artist + '\'' +
+                        '}';
+            }
+        }
+
+        List<ComparableArtist> comparableArtists = new ArrayList<>();
+
+        for (int i = 0; i < artists.size(); i++) {
+            String artist = artists.get(i);
+            int listened = getTimeListenedForArtistInSeconds(artist);
+            comparableArtists.add(new ComparableArtist(artist,listened));
+        }
+
+
+        Collections.sort(comparableArtists);
+        System.out.println(comparableArtists);
+        artists.clear();
+        for (ComparableArtist act : comparableArtists){
+            artists.add(act.artist);
+        }
+
+        return artists;
     }
 
     public static boolean isInDateRange(Date date, Date date2, double rangeInDays){

@@ -3,12 +3,23 @@ package net.mega2223.readify.util;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
+import java.util.Random;
 
 public class Misc {
 
-    public static final Color PREFERRED_COLORS[] = {Color.BLUE,Color.RED,Color.GREEN,Color.CYAN,Color.MAGENTA,Color.YELLOW};
+    public static final Color PREFERRED_COLORS[] = {Color.BLUE,Color.RED,Color.GREEN,Color.CYAN,Color.MAGENTA,Color.YELLOW,Color.ORANGE,Color.DARK_GRAY,Color.PINK};
+
+    public static Color[] genColorArray(int amount){
+        Color ret[] = new Color[amount];
+        Random random = new Random();
+        for (int i = 0; i < amount; i++) {
+            ret[i] = new Color(random.nextInt(256),random.nextInt(256),random.nextInt(256));
+        }
+        return ret;
+    }
 
     public static String readFromFile(File file) throws IOException {return readFromFile(file,null);}
 

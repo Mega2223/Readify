@@ -11,6 +11,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Time;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -20,14 +21,14 @@ import java.util.List;
 
 import static net.mega2223.readify.objects.SongHistory.isInDateRange;
 import static net.mega2223.readify.util.Misc.HTMLize;
+import static net.mega2223.readify.util.Misc.genColorArray;
 
 public class ApplicationWindow extends JFrame {
 
     //TODO: different states for if we are using songs from a playlist or from a user history or perhaps both, along with global variables
     //such is needed because playlists and user histories display different info
 
-    public static final int[] DEFAULT_GRAPH_DIMENSIONS = {300, 300};
-    protected static final int GLOBAL_GRAPH_SIZE = 200;
+    public static final int[] DEFAULT_GRAPH_DIMENSIONS = {400, 500};
 
     public SongHistory songHistory = new SongHistory();
     public JPanel statusCanvas = new JPanel();
@@ -123,12 +124,15 @@ public class ApplicationWindow extends JFrame {
             TimeSpanSelector sel = new TimeSpanSelector();
             sel.addConclusionTask(() -> {
                 List<List<double[]>> data = genRendererDataBasedOnTimeSpan(songHistory, sel.getTimeInSeconds());
+                String unit = sel.getSelectedTimeUnit().toString();
+                double totalUnits = sel.getTimeInSelectedTimeUnit();
+                if(totalUnits !=1){unit+="s";}
                 sel.dispose();
 
                 Date old = songHistory.getOldest().getEndTime();
                 Date nu = songHistory.getNewest().getEndTime();
 
-                GraphRenderer renderer = new GraphRenderer(data, new Dimension(DEFAULT_GRAPH_DIMENSIONS[0], DEFAULT_GRAPH_DIMENSIONS[1]), Misc.PREFERRED_COLORS);
+                GraphRenderer renderer = new GraphRenderer(data, new Dimension(DEFAULT_GRAPH_DIMENSIONS[0], DEFAULT_GRAPH_DIMENSIONS[1]), genColorArray(data.size()));
 
                 double songNumber = 1000;
                 double[] gridIndex = {0, 0};
@@ -146,12 +150,9 @@ public class ApplicationWindow extends JFrame {
                 stats.setVerticalTextPosition(SwingConstants.BOTTOM);
                 stats.setHorizontalTextPosition(SwingConstants.CENTER);
                 stats.setIcon(new ImageIcon(renderer.renderWithGridAndNumberNotation(new ArrayList<>(), gridIndex)));
+
                 String repor = "All songs you listened during the span from " + old + " to " + nu +
-                        ".\nThe numbers in the verticaal axis represent roughly one full week. \nThe ones in the vertical line represent the total number of minutes you listened during the selected span "
-                        + songNumber +
-                        " individual songs listened." +
-                        "\nThe blue line represents the sum of minutes listened, each gray block it surpasses ammount to "
-                        + songNumber + " minutes listened.";
+                        ".\nThe numbers in the vertical axis represent roughly one interval of " + totalUnits + " full "+ unit.toLowerCase() +".";
                 repor = HTMLize(repor);
                 stats.setText(repor);
                 pack();
@@ -163,7 +164,9 @@ public class ApplicationWindow extends JFrame {
         specificArtistGraphs.addActionListener(e -> {
             List<String> artists = songHistory.getArtists();
             String arr[] = new String[artists.size()];
-            Collections.sort(artists);
+            //Collections.sort(artists);
+            //artists = songHistory.sortBasedOnArtistPopularity(artists);
+            //System.out.println(artists);
             artists.toArray(arr);
             StringSelectionWindow artistSelectionWindow = new StringSelectionWindow("Select the artists that you wish to visually represent:", arr);
             artistSelectionWindow.confirmationButton.addActionListener(e1 -> {
@@ -194,15 +197,16 @@ public class ApplicationWindow extends JFrame {
                     TimeSpanSelector.AcceptedTimeUnit timeUnit = selector.getSelectedTimeUnit();
                     selector.dispose();
                     JPanel colorIndexPanel = new JPanel(new GridLayout(0, 1));
+                    Color colors[] = genColorArray(selected.size());
                     for (int i = 0; i < selected.size(); i++) {
                         String artist = selected.get(i);
-                        Color act = Misc.PREFERRED_COLORS[i];
+                        Color act = colors[i];
                         int r = act.getRed();
                         int g = act.getGreen();
                         int b = act.getBlue();
                         Color newColor = new Color(r, g, b);
-                        String infoDisplay = artist + " (Minutes listened per each " + "" + timeUnit.timeUnit.toLowerCase();
-                        if(unadaptedAmount != 1){artist += "s";}
+                        String infoDisplay = artist + " (Minutes listened per each " + unadaptedAmount + " " + timeUnit.timeUnit.toLowerCase();
+                        if(unadaptedAmount != 1.0){infoDisplay += "s";}
                         infoDisplay += ")";
                         JLabel timeListened = new JLabel(infoDisplay);
                         timeListened.setIcon(new ImageIcon(Misc.generateMonochromaticImage(10, 10, newColor)));
@@ -228,7 +232,7 @@ public class ApplicationWindow extends JFrame {
                         }
                     }
 
-                    GraphRenderer renderer = new GraphRenderer(data, new Dimension(GLOBAL_GRAPH_SIZE, GLOBAL_GRAPH_SIZE), Misc.PREFERRED_COLORS);
+                    GraphRenderer renderer = new GraphRenderer(data, new Dimension(DEFAULT_GRAPH_DIMENSIONS[0], DEFAULT_GRAPH_DIMENSIONS[1]), colors);
                     stats.setIcon(new ImageIcon(renderer.renderWithGridAndNumberNotation(new ArrayList<>(),gridIndex)));//fixme
                     stats.setText("All data from the selected artists between " + finalOld + " and " + finalNu);
                     stats.setHorizontalTextPosition(SwingConstants.CENTER);
