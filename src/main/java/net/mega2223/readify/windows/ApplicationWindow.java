@@ -11,7 +11,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.sql.Time;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -41,7 +40,8 @@ public class ApplicationWindow extends JFrame {
     public JMenuItem specificArtistGraphs = new JMenuItem("Generate graphic from a set of artists");
     public JMenuItem specificSongGraphics = new JMenuItem("Generate graphic from a specific set of songs");
     public JMenuItem generateFromOverallListeningTime = new JMenuItem("Generate graphic from overall listening time");
-
+    public JMenu stats = new JMenu("Stats");
+    public JMenuItem sortArtistsByTimePlayed = new JMenuItem("Sort artists by time played");
     public ApplicationWindow(int sX, int sY) {
 
         fromUserHistory.addActionListener(e -> {
@@ -241,7 +241,57 @@ public class ApplicationWindow extends JFrame {
             });
 
         });
+        sortArtistsByTimePlayed.addActionListener(e -> {
+            class SortingFrame extends JFrame{
+                SortingFrame(){
+                    setSize(100,500);
+                    GridBagLayout manager = new GridBagLayout();
+                    setLayout(manager);
+                    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+                    setVisible(true);
+                }
+            }
+            class ComparableArtist implements Comparable {
+                String name; long criteriaWeight;
+                ComparableArtist(String artist, long criteriaWeight){
+                    name = artist; this.criteriaWeight = criteriaWeight;
+                }
+                @Override
+                public int compareTo(Object o) {
+                    if(o instanceof ComparableArtist){
+                        return (int) (((ComparableArtist) o).criteriaWeight - this.criteriaWeight);
+                    }
+                    return 0;
+                }
 
+                @Override
+                public String toString() {
+                    return name + ": " + criteriaWeight + " minutes played in total";
+                }
+            }
+            
+            SortingFrame sortingFrame = new SortingFrame();
+            
+            List<String> artists = songHistory.getArtists();
+            long[] minutesPlayed = new long[artists.size()];
+            List<Track> listens = songHistory.getListens();
+            for(Track ac : listens){
+                int index = artists.indexOf(ac.getArtistName());
+                if(index < 0){
+                    continue;
+                }
+                minutesPlayed[index] += ac.getMsPlayed()/1000/60;
+            }
+            List<ComparableArtist> comparableArtists = new ArrayList<>(minutesPlayed.length);
+            for (int i = 0; i < minutesPlayed.length; i++) {
+                comparableArtists.add(new ComparableArtist(artists.get(i),minutesPlayed[i]));
+            }
+            Collections.sort(comparableArtists);
+            ComparableArtist[] artistsArray = new ComparableArtist[comparableArtists.size()];
+            comparableArtists.toArray(artistsArray);
+            sortingFrame.add(new JList<>(artistsArray));
+            
+        });
 
         statusCanvas.add(new JLabel("Welcome :), no songs currently loaded"));
 
@@ -253,8 +303,11 @@ public class ApplicationWindow extends JFrame {
         importer.add(fromUserHistory);
         importer.add(clearSharedSongList);
 
+        stats.add(sortArtistsByTimePlayed);
+
         jMenuBar.add(importer);
         jMenuBar.add(visuals);
+        jMenuBar.add(stats);
 
         BorderLayout layout = new BorderLayout(3, 3);
         //layout.setAlignment(FlowLayout.CENTER);
