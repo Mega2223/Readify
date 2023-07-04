@@ -60,14 +60,14 @@ public class SongHistory implements Iterable{
         }
         return count;
     }
-
+    /**Get a list of NON-REPEATING songs for this specific artist*/
     public List<String> getSongsForArtist(String artist){
         List<String> ret = new ArrayList<>();
         for (int i = 0; i < tracks.size(); i++) {
             Track trackAct = tracks.get(i);
             String artistName = trackAct.artistName;
-            if(artistName.equals(artist)){ret.add(artistName);}
-        }
+            if(artistName.equals(artist)&&!ret.contains(trackAct.trackName)){ret.add(trackAct.trackName);}
+        } //TODO: make a good and expandable string search panel
         return ret;
     }
 

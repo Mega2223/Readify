@@ -333,20 +333,10 @@ public class ApplicationWindow extends JFrame {
             sortingFrame.setVisible(true);
         });
         specificSongGraphics.addActionListener(e -> {
-
-            List<Track> tracks = songHistory.getSongs();
-            String[] titles = new String[tracks.size()];
-            for(int i = 0; i < tracks.size(); i++){titles[i] = tracks.get(i).getTrackName();}
-            StringSelectionWindow selectionWindow = new StringSelectionWindow("Select your desired tracks: ", titles);
-            selectionWindow.confirmationButton.addActionListener(e12 -> {
-                List<String> trackNamesToTrack = selectionWindow.getSelected();
-
-                List<Track>[] tracksToTrack /*I simply couldn't not do it*/ = new ArrayList[trackNamesToTrack.size()];
-                for (int i = 0; i < tracksToTrack.length; i++) {
-                    tracksToTrack[i] = songHistory.getListensForThisSong(trackNamesToTrack.get(i));
-                }//fixme acaba isso btw
-                Color[] colors = genColorArray(tracksToTrack.length);
-            });
+            List<String> artists = songHistory.getArtists();
+            String[] artistsArray = new String[artists.size()];
+            artists.toArray(artistsArray);
+            SongSelectionWindow songSelectionWindow = new SongSelectionWindow(artistsArray,songHistory);
         });
 
         statusCanvas.add(new JLabel("Welcome :), no songs currently loaded"));

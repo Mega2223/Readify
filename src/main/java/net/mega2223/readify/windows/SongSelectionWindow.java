@@ -37,7 +37,13 @@ public class SongSelectionWindow extends JFrame {
         pl.add(artistSelectionList);
         pm.add(songSelectionList);
         add(internalPanel);
+        //event handling
+        artistSelectionList.addListSelectionListener(e -> {
+            List<String> c = context.getSongsForArtist((String) artistSelectionList.getSelectedValue());
+            songSelectionList.setListData(c.toArray());
+        });
 
+        //init
         setVisible(true);
         pack();
     }
