@@ -1,6 +1,7 @@
 package net.mega2223.readify.objects;
 
 import java.awt.*;
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.TemporalField;
 import java.util.*;
@@ -80,15 +81,36 @@ public class SongHistory implements Iterable{
 
     public List<Track> getListens(){return (List<Track>) tracks.clone();}
 
+    public List<Track> getListensForThisSong(String trackName){
+        List<Track> ret = new ArrayList<>();
+        for(Track ac : tracks){
+            if(trackName.equals(ac.getTrackName())){
+                ret.add(ac.clone());
+            }
+        }
+        return ret;
+    }
+
+    public List<Track> getListensForThisSong(String trackName, String trackAuthor){
+        List<Track> ret = new ArrayList<>();
+        for(Track ac : tracks){
+            if(trackName.equals(ac.getTrackName())&&trackAuthor.equals(ac.getArtistName())){
+                ret.add(ac.clone());
+            }
+        }
+        return ret;
+    }
+    /**Does not repeat the same song twice, song duration equals the sum of all milis listened to this song*/
     public List<Track> getSongs(){
         List<Track> out = new ArrayList<>();
         List<String> buf = new ArrayList<>();
-        for (int i = 0; i < tracks.size(); i++) {
-            Track act = tracks.get(i);
-
-            if(!buf.contains(act.trackName)){out.add(act);}
-
-            buf.add(act.trackName);
+        for (Track act : tracks) {
+            if (!buf.contains(act.trackName)) {
+                Track newTrack = act.clone();
+                newTrack.setMsPlayed((int) getTotalMilisPlayedForSong(act.trackName));
+                out.add(newTrack);
+                buf.add(act.trackName);
+            }
         }
 
         return out;
@@ -155,9 +177,17 @@ public class SongHistory implements Iterable{
         return r;
     }
 
-    public int getTimeListenedForArtistInSeconds(String artist){
+    public long getTotalMilisPlayedForSong(String songTitle){
+        long ret = 0;
+        for (Track act : tracks){
+            if(act.getTrackName().equals(songTitle)){ret+=act.getMsPlayed();}
+        }
+        return ret;
+    }
+
+    public long getTimeListenedForArtistInSeconds(String artist){
         List<Track> songs = getSongsFromArtist(artist).getSongs();
-        int count = 0;
+        long count = 0;
         for (Track act : songs){
             count += act.msPlayed/1000;
         }
@@ -188,8 +218,8 @@ public class SongHistory implements Iterable{
 
         for (int i = 0; i < artists.size(); i++) {
             String artist = artists.get(i);
-            int listened = getTimeListenedForArtistInSeconds(artist);
-            comparableArtists.add(new ComparableArtist(artist,listened));
+            long listened = getTimeListenedForArtistInSeconds(artist);
+            comparableArtists.add(new ComparableArtist(artist, (int) listened));
         }
 
 

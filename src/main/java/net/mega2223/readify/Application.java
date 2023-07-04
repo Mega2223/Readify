@@ -6,7 +6,7 @@ public class Application {
 
     public static void main(String[] args) {
 
-        ApplicationWindow window = new ApplicationWindow(100,100);
+        ApplicationWindow window = new ApplicationWindow();
 
 
     }

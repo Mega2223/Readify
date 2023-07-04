@@ -20,6 +20,13 @@ public class Track {
         this.setTrackName(trackName);
     }
 
+    private Track(String trackName, String artistName, Date endTime, int msPlayed) throws ParseException {
+        this.setArtistName(artistName);
+        this.setEndTime(endTime);
+        this.setMsPlayed(msPlayed);
+        this.setTrackName(trackName);
+    }
+
     public String getTrackName() {
         return trackName;
     }
@@ -54,6 +61,15 @@ public class Track {
 
     public void setMsPlayed(int msPlayed) {
         this.msPlayed = msPlayed;
+    }
+
+    @Override
+    public Track clone(){
+        try {
+            return new Track(trackName,artistName,endTime,msPlayed);
+        } catch (ParseException e) {
+            return null;
+        }
     }
 
     @Override

@@ -9,13 +9,13 @@ import net.mega2223.utils.objects.GraphRenderer;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
+import java.util.*;
 import java.util.List;
 
 import static net.mega2223.readify.objects.SongHistory.isInDateRange;
@@ -42,7 +42,9 @@ public class ApplicationWindow extends JFrame {
     public JMenuItem generateFromOverallListeningTime = new JMenuItem("Generate graphic from overall listening time");
     public JMenu stats = new JMenu("Stats");
     public JMenuItem sortArtistsByTimePlayed = new JMenuItem("Sort artists by time played");
-    public ApplicationWindow(int sX, int sY) {
+    public JMenuItem sortSongsByTimePlayed = new JMenuItem("Sort songs by time played");
+
+    public ApplicationWindow() {
 
         fromUserHistory.addActionListener(e -> {
             File[] files = importFiles();
@@ -165,7 +167,7 @@ public class ApplicationWindow extends JFrame {
             List<String> artists = songHistory.getArtists();
             String arr[] = new String[artists.size()];
             //Collections.sort(artists);
-            //artists = songHistory.sortBasedOnArtistPopularity(artists);
+            artists = songHistory.sortBasedOnArtistPopularity(artists);
             //System.out.println(artists);
             artists.toArray(arr);
             StringSelectionWindow artistSelectionWindow = new StringSelectionWindow("Select the artists that you wish to visually represent:", arr);
@@ -197,7 +199,7 @@ public class ApplicationWindow extends JFrame {
                     TimeSpanSelector.AcceptedTimeUnit timeUnit = selector.getSelectedTimeUnit();
                     selector.dispose();
                     JPanel colorIndexPanel = new JPanel(new GridLayout(0, 1));
-                    Color colors[] = genColorArray(selected.size());
+                    Color[] colors = genColorArray(selected.size());
                     for (int i = 0; i < selected.size(); i++) {
                         String artist = selected.get(i);
                         Color act = colors[i];
@@ -292,6 +294,60 @@ public class ApplicationWindow extends JFrame {
             sortingFrame.add(new JList<>(artistsArray));
             
         });
+        sortSongsByTimePlayed.addActionListener(e -> {
+            class SortingFrame extends JFrame{
+                SortingFrame(){
+                    setSize(100,500);
+                    GridBagLayout manager = new GridBagLayout();
+                    setLayout(manager);
+                    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+                    setVisible(true);
+                }
+            }
+            class ComparableSong implements Comparable {
+                String name; long criteriaWeight;
+                ComparableSong(String name, long criteriaWeight){
+                    this.name = name; this.criteriaWeight = criteriaWeight;
+                }
+                @Override
+                public int compareTo(Object o) {
+                    if(o instanceof ComparableSong){
+                        return (int) (((ComparableSong) o).criteriaWeight - this.criteriaWeight);
+                    }
+                    return 0;
+                }
+
+                @Override
+                public String toString() {
+                    return name + ": " + criteriaWeight + " minutes played in total";
+                }
+            }
+            List<Track> songs = songHistory.getSongs();
+            ComparableSong[] songArray = new ComparableSong[songs.size()];
+            for(int i = 0; i < songArray.length; i++){
+                Track actTrack = songs.get(i);
+                songArray[i] = new ComparableSong(actTrack.getTrackName(),actTrack.getMsPlayed()/1000/60);}
+            Arrays.sort(songArray);
+            SortingFrame sortingFrame = new SortingFrame();
+            sortingFrame.add(new JList<>(songArray));
+            sortingFrame.setVisible(true);
+        });
+        specificSongGraphics.addActionListener(e -> {
+
+            List<Track> tracks = songHistory.getSongs();
+            String[] titles = new String[tracks.size()];
+            for(int i = 0; i < tracks.size(); i++){titles[i] = tracks.get(i).getTrackName();}
+            StringSelectionWindow selectionWindow = new StringSelectionWindow("Select your desired tracks: ", titles);
+            selectionWindow.confirmationButton.addActionListener(e12 -> {
+                List<String> trackNamesToTrack = selectionWindow.getSelected();
+
+                List<Track>[] tracksToTrack /*I simply couldn't not do it*/ = new ArrayList[trackNamesToTrack.size()];
+                for (int i = 0; i < tracksToTrack.length; i++) {
+                    tracksToTrack[i] = songHistory.getListensForThisSong(trackNamesToTrack.get(i));
+                }//fixme acaba isso btw
+                Color[] colors = genColorArray(tracksToTrack.length);
+            });
+        });
 
         statusCanvas.add(new JLabel("Welcome :), no songs currently loaded"));
 
@@ -304,6 +360,7 @@ public class ApplicationWindow extends JFrame {
         importer.add(clearSharedSongList);
 
         stats.add(sortArtistsByTimePlayed);
+        stats.add(sortSongsByTimePlayed);
 
         jMenuBar.add(importer);
         jMenuBar.add(visuals);
