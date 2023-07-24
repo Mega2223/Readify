@@ -1,6 +1,8 @@
 # Readify
 Lightweight application to summarise your spotify data
 
+#### Note: this documentation is outdated, Readify is going through a large rewrite in some parts rn, I will set up up to date documentation when completed
+
 ## 1 About:
 
 Readify uses the [GSON](https://github.com/google/gson) API to read Json files and convert their data into readable stats, it does not require any internet connection whatsoever. I am working on it in order to keep track of my listening habits and to know how precisely addicted I am to listening stuff.  
