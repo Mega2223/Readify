@@ -2,15 +2,18 @@ package net.mega2223.readify.windows;
 
 import net.mega2223.readify.objects.SongHistory;
 import net.mega2223.readify.objects.Track;
+import net.mega2223.readify.util.DataInterpreter;
 import net.mega2223.readify.util.JsonConverter;
 import net.mega2223.readify.util.Misc;
+import net.mega2223.readify.util.PreRenderingUtils;
+import net.mega2223.utils.objects.GraphBuilder;
 import net.mega2223.utils.objects.GraphRenderer;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.datatransfer.StringSelection;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
@@ -19,8 +22,7 @@ import java.util.*;
 import java.util.List;
 
 import static net.mega2223.readify.objects.SongHistory.isInDateRange;
-import static net.mega2223.readify.util.Misc.HTMLize;
-import static net.mega2223.readify.util.Misc.genColorArray;
+import static net.mega2223.readify.util.Misc.*;
 
 public class ApplicationWindow extends JFrame {
 
@@ -38,8 +40,8 @@ public class ApplicationWindow extends JFrame {
     public JMenuItem clearSharedSongList = new JMenuItem("Clear songs");
     public JMenu visuals = new JMenu("Visuals");
     public JMenuItem specificArtistGraphs = new JMenuItem("Generate graphic from a set of artists");
-    public JMenuItem specificSongGraphics = new JMenuItem("Generate graphic from a specific set of songs");
-    public JMenuItem generateFromOverallListeningTime = new JMenuItem("Generate graphic from overall listening time");
+    public JMenuItem specificSongGraphs = new JMenuItem("Generate graphic from a specific set of songs");
+    public JMenuItem genOverallListeningTime = new JMenuItem("Generate graphic from overall listening time");
     public JMenu stats = new JMenu("Stats");
     public JMenuItem sortArtistsByTimePlayed = new JMenuItem("Sort artists by time played");
     public JMenuItem sortSongsByTimePlayed = new JMenuItem("Sort songs by time played");
@@ -122,36 +124,36 @@ public class ApplicationWindow extends JFrame {
             refreshSongStats();
             invalidate();
         });
-        generateFromOverallListeningTime.addActionListener(e -> {
+        genOverallListeningTime.addActionListener(e -> {
             TimeSpanSelector sel = new TimeSpanSelector();
             sel.addConclusionTask(() -> {
-                List<List<double[]>> data = genRendererDataBasedOnTimeSpan(songHistory, sel.getTimeInSeconds());
                 String unit = sel.getSelectedTimeUnit().toString();
                 double totalUnits = sel.getTimeInSelectedTimeUnit();
                 if(totalUnits !=1){unit+="s";}
                 sel.dispose();
 
                 Date old = songHistory.getOldest().getEndTime();
-                Date nu = songHistory.getNewest().getEndTime();
+                Date nu = songHistory.getLatest().getEndTime();
 
-                GraphRenderer renderer = new GraphRenderer(data, new Dimension(DEFAULT_GRAPH_DIMENSIONS[0], DEFAULT_GRAPH_DIMENSIONS[1]), genColorArray(data.size()));
+                double[][][] data = DataInterpreter.genTotalTimeListenedData(songHistory,(long)(sel.getTimeInSeconds()*1000));
+                /*List<Color> col = genColorList(1);
+                BufferedImage graph = GraphBuilder.buildPureGraph(data, col,400,400);
+                List<Date> datesToSub = PreRenderingUtils.genDates(old, nu, dateRange / 10);
+                List<String>[] subs = PreRenderingUtils.genSubsForGraph(data,new double[]{.1,.1}, datesToSub);
 
-                double songNumber = 1000;
-                double[] gridIndex = {0, 0};
-                for (List<double[]> dataAct : data) {
-                    for(double[] dataActAct : dataAct){
-                        if(dataActAct[0]>gridIndex[0]*10){gridIndex[0] = dataActAct[0]/10;}
-                        if(dataActAct[1]>gridIndex[1]*10){gridIndex[1] = dataActAct[1]/10;}
-                    }
-                }
+                graph = GraphBuilder.buildAxisCaptions(graph,data,new double[]{dateRange/10,},subs[0],subs[1],400,400,100,Color.black);
+                GraphBuilder.buildCorners(graph);
 
+                 */
+                BufferedImage graph = DataInterpreter.genFullGraphFromData(data,new int[]{5,5},old,nu);
+                //DataInterpreter.debugData(data);
                 statusCanvas.removeAll();
                 JLabel stats = new JLabel();
                 statusCanvas.add(stats);
 
                 stats.setVerticalTextPosition(SwingConstants.BOTTOM);
                 stats.setHorizontalTextPosition(SwingConstants.CENTER);
-                stats.setIcon(new ImageIcon(renderer.renderWithGridAndNumberNotation(new ArrayList<>(), gridIndex)));
+                stats.setIcon(new ImageIcon(graph));
 
                 String repor = "All songs you listened during the span from " + old + " to " + nu +
                         ".\nThe numbers in the vertical axis represent roughly one interval of " + totalUnits + " full "+ unit.toLowerCase() +".";
@@ -181,12 +183,12 @@ public class ApplicationWindow extends JFrame {
                     histories.add(songsFromArtist);
                 }
                 Date old = histories.get(0).getOldest().getEndTime();
-                Date nu = histories.get(0).getNewest().getEndTime();
+                Date nu = histories.get(0).getLatest().getEndTime();
                 for (int i = 0; i < histories.size(); i++) {
                     SongHistory act = histories.get(i);
                     Date oldestEndTime = act.getOldest().getEndTime();
                     if (oldestEndTime.before(old)){old = oldestEndTime;}
-                    Date newestEndTime = act.getNewest().getEndTime();
+                    Date newestEndTime = act.getLatest().getEndTime();
                     if (newestEndTime.after(nu)){nu = newestEndTime;}
                 }
                 artistSelectionWindow.dispose();
@@ -332,18 +334,21 @@ public class ApplicationWindow extends JFrame {
             sortingFrame.add(new JList<>(songArray));
             sortingFrame.setVisible(true);
         });
-        specificSongGraphics.addActionListener(e -> {
+        specificSongGraphs.addActionListener(e -> {
             List<String> artists = songHistory.getArtists();
             String[] artistsArray = new String[artists.size()];
             artists.toArray(artistsArray);
-            SongSelectionWindow songSelectionWindow = new SongSelectionWindow(artistsArray,songHistory);
+            SongSelectionWindow songSelectionWindow = new SongSelectionWindow(artistsArray, songHistory,
+                    () -> {
+                        //todo
+                    });
         });
 
         statusCanvas.add(new JLabel("Welcome :), no songs currently loaded"));
 
         visuals.add(specificArtistGraphs);
-        visuals.add(specificSongGraphics);
-        visuals.add(generateFromOverallListeningTime);
+        visuals.add(specificSongGraphs);
+        visuals.add(genOverallListeningTime);
 
         importer.add(fromEndSong);
         importer.add(fromUserHistory);
@@ -378,17 +383,17 @@ public class ApplicationWindow extends JFrame {
     public static List<List<double[]>> genRendererDataBasedOnTimeSpan(List<SongHistory> songHistories, double loopFrequencyInSeconds) {
 
         Date old = songHistories.get(0).getOldest().getEndTime();
-        Date nu = songHistories.get(0).getNewest().getEndTime();
+        Date nu = songHistories.get(0).getLatest().getEndTime();
 
         Track oldTrack = songHistories.get(0).getOldest();
-        Track newTrack = songHistories.get(0).getNewest();
+        Track newTrack = songHistories.get(0).getLatest();
 
         for (int i = 1; i < songHistories.size(); i++) {
             //gets the oldest and newest songs from all songhistories and selects the oldest oldest, and newest newest respecively
             //thanks CGPGray for making the above sentence acceptable
             Track oldest = songHistories.get(i).getOldest();
             Date oldestEndTime = oldest.getEndTime();
-            Track newest = songHistories.get(i).getNewest();
+            Track newest = songHistories.get(i).getLatest();
             Date newestEndTime = newest.getEndTime();
             if (old.after(oldestEndTime)) {
                 old = oldestEndTime;

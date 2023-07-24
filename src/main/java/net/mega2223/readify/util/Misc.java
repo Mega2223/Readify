@@ -20,7 +20,15 @@ public class Misc {
         }
         return ret;
     }
-
+    public static List<Color> genColorList(int amount){
+        Random random = new Random();
+        ArrayList<Color> ret = new ArrayList();
+        for (int i = 0; i < amount; i++) {
+            Color c = new Color(random.nextInt(256),random.nextInt(256),random.nextInt(256));
+            ret.add(c);
+        }
+        return ret;
+    }
     public static String readFromFile(File file) throws IOException {return readFromFile(file,null);}
 
     public static String readFromFile(File file, Runnable task) throws IOException {
@@ -28,15 +36,15 @@ public class Misc {
         BufferedReader reader = new BufferedReader(new FileReader(file));
 
         String nextLine = reader.readLine();
-        String sampleString = "";
+        StringBuilder sampleString = new StringBuilder();
 
         while (nextLine != null){
-            sampleString += nextLine + "\n";
+            sampleString.append(nextLine).append("\n");
             nextLine = reader.readLine();
             if(task!=null){task.run();}
         }
 
-        return sampleString;
+        return sampleString.toString();
     }
     public static String adaptDate(String previous){
         if(previous.contains("T")){return adaptDateEndSong(previous);}

@@ -70,7 +70,7 @@ public class TimeSpanSelector extends JFrame {
         return Double.parseDouble(timeInput.getText());
     }
 
-    protected static class AcceptedTimeUnit{
+    public static class AcceptedTimeUnit{
         public String timeUnit;
         public double durationInSeconds;
 

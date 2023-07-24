@@ -1,9 +1,6 @@
 package net.mega2223.readify.objects;
 
-import java.awt.*;
-import java.text.ParseException;
 import java.time.Instant;
-import java.time.temporal.TemporalField;
 import java.util.*;
 import java.util.List;
 
@@ -61,14 +58,22 @@ public class SongHistory implements Iterable{
         return count;
     }
     /**Get a list of NON-REPEATING songs for this specific artist*/
-    public List<String> getSongsForArtist(String artist){
+    public List<String> getSongsForArtist(String artist, boolean putArtistName){
         List<String> ret = new ArrayList<>();
         for (int i = 0; i < tracks.size(); i++) {
             Track trackAct = tracks.get(i);
             String artistName = trackAct.artistName;
-            if(artistName.equals(artist)&&!ret.contains(trackAct.trackName)){ret.add(trackAct.trackName);}
+            String trackName = trackAct.trackName;
+            if(putArtistName){trackName = artistName + " - " + trackName;}
+            if(artistName.equals(artist)&&!ret.contains(trackName)){
+                ret.add(trackName);
+            }
         } //TODO: make a good and expandable string search panel
         return ret;
+    }
+
+    public List<String> getSongsForArtist(String artist){
+        return getSongsForArtist(artist,false);
     }
 
     public void loadSongs(List<Track> tracks){this.tracks.addAll(tracks);}
@@ -166,7 +171,7 @@ public class SongHistory implements Iterable{
         return r;
     }
 
-    public Track getNewest(){
+    public Track getLatest(){
         Track r = tracks.get(0);
         for (int i = 0; i < tracks.size(); i++) {
             Track act = tracks.get(i);
@@ -235,13 +240,29 @@ public class SongHistory implements Iterable{
 
     public static boolean isInDateRange(Date date, Date date2, double rangeInDays){
 
-        Date endTime = date2;
-        Instant endt = endTime.toInstant();
+        Instant endt = date2.toInstant();
         Instant before = endt.minusSeconds((long) (86400*rangeInDays));
         Instant after = endt.plusSeconds((long) (86400*rangeInDays));
 
         return (date.after(Date.from(before))&&date.before(Date.from(after)));
 
+    }
+
+    public static boolean isInDateRange(Track track, long instantMilis, long rangeMilis){
+        long songMilis = track.getEndTime().getTime();
+        return isInMilisRange(songMilis,instantMilis,rangeMilis);
+    }
+
+    public static boolean isInMilisRange (long m1, long m2, long r){
+        return Math.abs(m1-m2) <= r;
+    }
+
+    public List<Track> getAllSongsInRange (long timeMilis, long rangeMilis){
+        List<Track> songs = new ArrayList<>();
+        for (Track ac : this.tracks){
+            if(isInDateRange(ac,timeMilis,rangeMilis)){songs.add(ac);}
+        }
+        return songs;
     }
 
 
