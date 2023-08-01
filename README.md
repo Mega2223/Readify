@@ -50,16 +50,9 @@ If the report reflects your data, then congrats, you successfully loaded your da
 ### 3.1 Dependencies
 
 This repo requires two Maven dependencies to work, [GSON](https://github.com/google/gson) and [AguaLib](https://github.com/Mega2223/aguaLib/), a personal lib that is responsible for rendering the graphs.  
+Unfortunately i haven't been able to upload aguaLib to Maven Central yet, so you need to clone the repository and execute the maven deploy task yourself in order to solve this dependency.  
 Here is what your pom.xml should absolutely have in order for the application to work:
   ```xml
-  
-  <repositories>
-       <repository>
-          <id>jitpack.io</id>
-          <url>https://jitpack.io</url>
-        </repository>
-  </repositories>
-  
   <dependencies>
         <dependency>
            <groupId>com.google.code.gson</groupId>
