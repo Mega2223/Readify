@@ -17,28 +17,24 @@ Upon making a request, it will take some days for Spotify to compile it all, whe
 
 ### 2.2 Loading your data:
 
-Upon downloading and extracting your data, your files should look somewhat like these:
+Upon downloading and extracting your data, your files should be a bunch of JSon files, most of these files are irrelevant for us, the ones you need to look for can show in 3 different ways depending on how you requested your data:
 
-![Files](https://user-images.githubusercontent.com/59067466/184043988-a3b947f5-27d7-4ecf-b431-4b425147c170.png)
+![Files](https://github.com/Mega2223/Readify/assets/59067466/0b8e5260-7cc1-4c14-850b-c36f8c09935e)
 
-Most of these are irrelevant for us, the ones you need to look for are those:
+The quantity of files largely depends on the quantity of songs you listened. As soon as you located those, open the application and you may see a screen like this:
 
-![CutFiles](https://user-images.githubusercontent.com/59067466/184044205-8ee75663-64bd-4e99-955d-60e00a624ad8.png) 
-
-The quantity of files largely depends on the quantity of songs you listened, soon as you located those, open the application and you may see a screen like this:
-
-![StartScreen](https://user-images.githubusercontent.com/59067466/184047705-df7fc44d-2931-4533-974f-98db054c43b7.png)
+![StartScreen](https://github.com/Mega2223/Readify/assets/59067466/a86492a6-48bc-4b4e-a758-51b592a995a6)
 
 Upon opening the first drop menu, you may see the following:
 
-![DropMenu](https://user-images.githubusercontent.com/59067466/184047731-c5a70d0d-8d54-4591-a56d-eb48f9386f12.png)
+![DropMenu](https://github.com/Mega2223/Readify/assets/59067466/cb047d20-beb4-4b55-b3d4-7aed16a911f5)
 
-Currently the option "from playlist" does not work and it may be discontinued in future releases.  
-Upon selecting the "from user history" a file choosing window will open, navigate and select your files, you may select them all at once by holding CTRL or SHIFT
+If you only have the last year's history then select the StreamHistory files option, otherwise select the EndSong option.  
+Go to your files using the file explorer, note that you can select multiple files by holding Shift or Ctrl.
 
 ![FileSelection](https://user-images.githubusercontent.com/59067466/184047914-d7643ac6-4078-4574-8bb9-ef14d7e2f8d9.png)
 
-Upon selecting the songs you will stumble upon the ugliest loading bar ever created, wait for it to load all your songs, this may take a while considering how large those files tend to be
+The application may display a loading bar or freeze depending on how your data is handled, this may take a minute so so not close the application, even if it stops answering.
 
 ![LoadingSongs](https://user-images.githubusercontent.com/59067466/184048002-0be796d2-92e0-49f5-befc-ba0bd4373ae7.png)
 
