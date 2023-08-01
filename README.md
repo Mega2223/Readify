@@ -40,7 +40,8 @@ The application may display a loading bar or freeze depending on how your data i
 
 After a while you will end up with this screen:
 
-![Report](https://user-images.githubusercontent.com/59067466/184048400-332201bf-a390-4366-9ac5-35cad365462d.png)
+![Report](https://github.com/Mega2223/Readify/assets/59067466/294e59fb-e3a1-4852-9f62-788c4d610667)
+
 
 If the report reflects your data, then congrats, you successfully loaded your data.
 
