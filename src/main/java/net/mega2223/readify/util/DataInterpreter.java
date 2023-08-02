@@ -54,19 +54,21 @@ public class DataInterpreter {
 
         long dateRange = Math.abs(oldest.getTime()-latest.getTime());
         List<Color> col = genColorList(1);
-        BufferedImage graph = GraphBuilder.buildPureGraph(normalizeXAxis(data), col,400,400);
+        BufferedImage graph = GraphBuilder.buildPureGraph(data, col,700,400);
         List<Date> datesToSub = PreRenderingUtils.genDates(oldest, latest, dateRange / numberOfLines[0]);
         List<String>[] subs = PreRenderingUtils.genSubsForGraph(data,new double[]{.1,.1}, datesToSub);
 
         double[] dataBounds = getDataBounds(data);
 
-        double[] interval = {dateRange / (double)numberOfLines[0],Math.abs(dataBounds[0]-Math.abs(dataBounds[1]))};
+        double[] interval = {dateRange / (double)numberOfLines[0],Math.abs(dataBounds[Y_MIN] - dataBounds[Y_MAX])/(double) numberOfLines[1]};
 
         Font font = Font.decode("Consolas");
         font = new Font(font.getName(),font.getStyle(), FONT_SIZE);
-
-        graph = GraphBuilder.buildAxisCaptions(graph,data, interval,subs[0],subs[1],GraphBuilder.DIRECTION_LEFT,GraphBuilder.DIRECTION_DOWN,100,Color.BLACK,font);
-        GraphBuilder.buildCorners(graph);
+        //graph = GraphBuilder.transpose(graph,GraphBuilder.buildAuxiliarLines(data,Color.gray,interval,700,400));
+        //GraphBuilder.buildCorners(graph);
+        //graph = GraphBuilder.buildAxisCaptions(graph,data, interval,subs[0],subs[1],GraphBuilder.DIRECTION_RIGHT,GraphBuilder.DIRECTION_DOWN,100,Color.BLACK,font);
+        //GraphBuilder.buildCorners(graph);
+        graph = GraphBuilder.generateGraphAndSubs(data,col,700,400,interval,font,GraphBuilder.DIRECTION_RIGHT,GraphBuilder.DIRECTION_DOWN,subs[0],subs[1],100,Color.gray,Color.black);
         return graph;
     }
     protected static final int X_MIN = 0, X_MAX = 1, Y_MIN = 2, Y_MAX = 3;

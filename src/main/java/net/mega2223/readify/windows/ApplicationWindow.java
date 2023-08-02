@@ -5,14 +5,11 @@ import net.mega2223.readify.objects.Track;
 import net.mega2223.readify.util.DataInterpreter;
 import net.mega2223.readify.util.JsonConverter;
 import net.mega2223.readify.util.Misc;
-import net.mega2223.readify.util.PreRenderingUtils;
-import net.mega2223.utils.objects.GraphBuilder;
 import net.mega2223.utils.objects.GraphRenderer;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +29,8 @@ public class ApplicationWindow extends JFrame {
     public static final int[] DEFAULT_GRAPH_DIMENSIONS = {400, 500};
 
     public SongHistory songHistory = new SongHistory();
-    public JPanel statusCanvas = new JPanel();
+    public JPanel centralCanvas = new JPanel();
+    public JLabel statusLabel = new JLabel(generateStatReport(true));
     public JMenuBar jMenuBar = new JMenuBar();
     public JMenu importer = new JMenu("Import");
     public JMenuItem fromUserHistory = new JMenuItem("From StreamHistory files");
@@ -63,8 +61,8 @@ public class ApplicationWindow extends JFrame {
                 }
             }*/
             JLabel stats = new JLabel();
-            statusCanvas.removeAll();
-            statusCanvas.add(stats);
+            centralCanvas.removeAll();
+            centralCanvas.add(stats);
             JLabel updateStatus = new JLabel("Loading songs...");
             JProgressBar progressBar = new JProgressBar(0, fileSizeEstimate);
             JPanel panel = new JPanel(new GridLayout(2, 1));
@@ -89,7 +87,7 @@ public class ApplicationWindow extends JFrame {
                             updateStatus.setText("Estimated progress: " + (int) ((double) counts[0] / (double) songEstimate * 100) + "%");
                             counts[0]++;
                         }, () -> {
-                            statusCanvas.removeAll();
+                            centralCanvas.removeAll();
                         });
                         songHistory.loadSongs(tracks);
                     } catch (IOException | ParseException ex) {
@@ -100,7 +98,7 @@ public class ApplicationWindow extends JFrame {
                 remove(panel);
                 refreshSongStats();
             });
-            statusCanvas.add(panel);
+            centralCanvas.add(panel);
             loadingThread.start();
         });
         fromEndSong.addActionListener(e -> {
@@ -145,11 +143,11 @@ public class ApplicationWindow extends JFrame {
                 GraphBuilder.buildCorners(graph);
 
                  */
-                BufferedImage graph = DataInterpreter.genFullGraphFromData(data,new int[]{5,5},old,nu);
+                BufferedImage graph = DataInterpreter.genFullGraphFromData(data,new int[]{10,10},old,nu);
                 //DataInterpreter.debugData(data);
-                statusCanvas.removeAll();
+                centralCanvas.removeAll();
                 JLabel stats = new JLabel();
-                statusCanvas.add(stats);
+                centralCanvas.add(stats);
 
                 stats.setVerticalTextPosition(SwingConstants.BOTTOM);
                 stats.setHorizontalTextPosition(SwingConstants.CENTER);
@@ -223,9 +221,9 @@ public class ApplicationWindow extends JFrame {
                     List<List<double[]>> data = genRendererDataBasedOnTimeSpan(histories, wideInSecs);
 
                     JLabel stats = new JLabel();
-                    statusCanvas.removeAll();
-                    statusCanvas.add(stats);
-                    statusCanvas.add(colorIndexPanel);
+                    centralCanvas.removeAll();
+                    centralCanvas.add(stats);
+                    centralCanvas.add(colorIndexPanel);
 
                     double[] gridIndex = {0,0};
 
@@ -344,7 +342,7 @@ public class ApplicationWindow extends JFrame {
                     });
         });
 
-        statusCanvas.add(new JLabel("Welcome :), no songs currently loaded"));
+        centralCanvas.add(statusLabel);
 
         visuals.add(specificArtistGraphs);
         visuals.add(specificSongGraphs);
@@ -366,7 +364,7 @@ public class ApplicationWindow extends JFrame {
         setLayout(layout);
 
         setJMenuBar(jMenuBar);
-        add(statusCanvas);//, JFrame.CENTER_ALIGNMENT);
+        add(centralCanvas);//, JFrame.CENTER_ALIGNMENT);
 
         pack();
         setVisible(true);
@@ -408,10 +406,10 @@ public class ApplicationWindow extends JFrame {
         System.out.println("OLDEST: " + oldTrack);
         System.out.println("NEWEST: " + newTrack);
 
-        List<List<double[]>> overallData = new ArrayList();
+        List<List<double[]>> overallData = new ArrayList<>();
 
         for (int i = 0; i < songHistories.size(); i++) {
-            overallData.add(new ArrayList<double[]>());
+            overallData.add(new ArrayList<>());
         }
 
         int dateItnerations = 0;
@@ -433,7 +431,7 @@ public class ApplicationWindow extends JFrame {
                         msls += act.getMsPlayed();
                     }
                 }
-                overallData.get(l).add(new double[]{dateItnerations, msls/1000/60});
+                overallData.get(l).add(new double[]{dateItnerations, msls/1000./60});
             }
             dateItnerations++;
         }
@@ -445,8 +443,7 @@ public class ApplicationWindow extends JFrame {
     }
 
     public void refreshSongStats() {
-        statusCanvas.removeAll();
-        statusCanvas.add(new JLabel(generateStatReport(true)));
+        statusLabel.setText(generateStatReport(true));
         invalidate();
     }
 
@@ -459,7 +456,7 @@ public class ApplicationWindow extends JFrame {
         if (songs.size() == 0) {
             return ("No songs loaded");
         } else if (songs.size() == 1) {
-            return ("1 song currently loaded");
+            return ("1 session currently loaded");
         } else {
             List<Track> individualSongs = songHistory.getSongs();
             List<String> individualArtists = songHistory.getArtists();
