@@ -5,10 +5,13 @@ import net.mega2223.readify.objects.Track;
 import net.mega2223.readify.util.DataInterpreter;
 import net.mega2223.readify.util.JsonConverter;
 import net.mega2223.readify.util.Misc;
+import net.mega2223.readify.util.PreRenderingUtils;
+import net.mega2223.utils.objects.GraphBuilder;
 import net.mega2223.utils.objects.GraphRenderer;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.text.AttributeSet;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -23,12 +26,11 @@ import static net.mega2223.readify.util.Misc.*;
 
 public class ApplicationWindow extends JFrame {
 
-    //TODO: different states for if we are using songs from a playlist or from a user history or perhaps both, along with global variables
-    //such is needed because playlists and user histories display different info
-
     public static final int[] DEFAULT_GRAPH_DIMENSIONS = {400, 500};
-
     public SongHistory songHistory = new SongHistory();
+    Font currentFont = new Font("Consolas",Font.PLAIN,10);
+
+    //JFrame elements
     public JPanel centralCanvas = new JPanel();
     public JLabel statusLabel = new JLabel(generateStatReport(true));
     public JMenuBar jMenuBar = new JMenuBar();
@@ -133,18 +135,20 @@ public class ApplicationWindow extends JFrame {
                 Date old = songHistory.getOldest().getEndTime();
                 Date nu = songHistory.getLatest().getEndTime();
 
+
                 double[][][] data = DataInterpreter.genTotalTimeListenedData(songHistory,(long)(sel.getTimeInSeconds()*1000));
-                /*List<Color> col = genColorList(1);
-                BufferedImage graph = GraphBuilder.buildPureGraph(data, col,400,400);
-                List<Date> datesToSub = PreRenderingUtils.genDates(old, nu, dateRange / 10);
-                List<String>[] subs = PreRenderingUtils.genSubsForGraph(data,new double[]{.1,.1}, datesToSub);
 
-                graph = GraphBuilder.buildAxisCaptions(graph,data,new double[]{dateRange/10,},subs[0],subs[1],400,400,100,Color.black);
-                GraphBuilder.buildCorners(graph);
-
-                 */
-                BufferedImage graph = DataInterpreter.genFullGraphFromData(data,new int[]{10,10},old,nu);
+                long dateRange = Math.abs(old.getTime() - nu.getTime());
+                List<Color> col = genColorList(1);
+                List<String>[] subs = PreRenderingUtils.genSubsForGraph(data,new double[]{.1,.1}, PreRenderingUtils.genDates(old, nu, dateRange / 10));
+                double[] dataBounds = DataInterpreter.getDataBounds(data);
+                double[] interval = {
+                        Math.abs(dataBounds[0] - dataBounds[1])/10,
+                        Math.abs(dataBounds[2] - dataBounds[3])/10
+                };
+                BufferedImage graph = DataInterpreter.genFullGraphAndCaptionsFromData(data,new int[]{10,10},old,nu,currentFont,800,500);
                 //DataInterpreter.debugData(data);
+
                 centralCanvas.removeAll();
                 JLabel stats = new JLabel();
                 centralCanvas.add(stats);

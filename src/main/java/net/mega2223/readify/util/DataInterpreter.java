@@ -50,30 +50,35 @@ public class DataInterpreter {
         return ret;
     }
 
-    public static BufferedImage genFullGraphFromData(double[][][] data, int[] numberOfLines, Date oldest, Date latest){
-
+    public static BufferedImage genFullGraphFromData(double[][][] data, int[] numberOfLines, Date oldest, Date latest, Font font, int sX, int sY){
         long dateRange = Math.abs(oldest.getTime()-latest.getTime());
         List<Color> col = genColorList(1);
-        BufferedImage graph = GraphBuilder.buildPureGraph(data, col,700,400);
+        BufferedImage graph = GraphBuilder.buildPureGraph(data, col,sX,sY);
         List<Date> datesToSub = PreRenderingUtils.genDates(oldest, latest, dateRange / numberOfLines[0]);
-        List<String>[] subs = PreRenderingUtils.genSubsForGraph(data,new double[]{.1,.1}, datesToSub);
-
         double[] dataBounds = getDataBounds(data);
-
-        double[] interval = {dateRange / (double)numberOfLines[0],Math.abs(dataBounds[Y_MIN] - dataBounds[Y_MAX])/(double) numberOfLines[1]};
-
-        Font font = Font.decode("Consolas");
-        font = new Font(font.getName(),font.getStyle(), FONT_SIZE);
-        //graph = GraphBuilder.transpose(graph,GraphBuilder.buildAuxiliarLines(data,Color.gray,interval,700,400));
-        //GraphBuilder.buildCorners(graph);
-        //graph = GraphBuilder.buildAxisCaptions(graph,data, interval,subs[0],subs[1],GraphBuilder.DIRECTION_RIGHT,GraphBuilder.DIRECTION_DOWN,100,Color.BLACK,font);
-        //GraphBuilder.buildCorners(graph);
-        graph = GraphBuilder.generateGraphAndSubs(data,col,700,400,interval,font,GraphBuilder.DIRECTION_RIGHT,GraphBuilder.DIRECTION_DOWN,subs[0],subs[1],100,Color.gray,Color.black);
+        double[] interval = {
+                Math.abs(dataBounds[X_MIN] - dataBounds[X_MAX])/numberOfLines[0], Math.abs(dataBounds[Y_MIN] - dataBounds[Y_MAX])/numberOfLines[1]
+        };
+        GraphBuilder.buildAuxiliarLines(graph, data, Color.gray, interval);
         return graph;
     }
+
+    public static BufferedImage genFullGraphAndCaptionsFromData(double [][][] data, int[] numberOfLines, Date oldest, Date latest, Font font, int sX, int sY){
+        long dateRange = Math.abs(oldest.getTime()-latest.getTime());
+        List<Color> col = genColorList(1);
+        List<Date> datesToSub = PreRenderingUtils.genDates(oldest, latest, dateRange / numberOfLines[0]);
+        double[] dataBounds = getDataBounds(data);
+        double[] interval = {
+                Math.abs(dataBounds[X_MIN] - dataBounds[X_MAX])/numberOfLines[0], Math.abs(dataBounds[Y_MIN] - dataBounds[Y_MAX])/numberOfLines[1]
+        };
+        List<String>[] subs = PreRenderingUtils.genSubsForGraph(data,new double[]{.1,.1}, datesToSub);
+
+        return GraphBuilder.generateGraphAndSubs(data,col,sX,sY,interval,font,GraphBuilder.DIRECTION_LEFT,GraphBuilder.DIRECTION_DOWN,subs[0],subs[1],sX/8,Color.gray,Color.black);
+    }
+
     protected static final int X_MIN = 0, X_MAX = 1, Y_MIN = 2, Y_MAX = 3;
     public static double[] getDataBounds(double[][][] data){
-        double[] ret = new double[4];
+        double[] ret = {data[0][0][0],data[0][0][0],data[0][0][1],data[0][0][1]};
         for (double[][] l : data) {
             for (int p = 0; p < l.length; p++) {
                 ret[X_MIN] = Math.min(l[p][0], ret[0]);

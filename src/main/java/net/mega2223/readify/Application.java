@@ -10,12 +10,25 @@ import java.io.IOException;
 import java.text.ParseException;
 
 public class Application {
-
+    /**
+     * TODO LIST:
+     * Halt data from a specific interval
+     * Code cleanup
+     * Use only one single status JLabel at ApplicationWindow
+     * Update all options to new graph building class
+     * Demonstration of stats for the readme.md
+     * Create logo and social media preview for GitHub repo
+     * Create Icon
+     * Add font options
+     * */
     public static void main(String[] args) throws IOException, ParseException {
         ApplicationWindow window = new ApplicationWindow();
-
-        for (int i = 0; i < args.length; i++) {
-            String data = Misc.readFromFile(new File(args[i]),null);
+        if (args.length > 0){
+            window.statusLabel.setText(Misc.HTMLize("Loading pre-specified endsong files...\nThis may take a minute"));
+            window.pack();
+        }
+        for (String arg : args) {
+            String data = Misc.readFromFile(new File(arg), null);
             SongHistory ac = JsonConverter.convertFromEndSongFormat(data);
             window.songHistory.loadSongs(ac);
         }

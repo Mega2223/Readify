@@ -27,7 +27,7 @@
         <dependency>
             <groupId>net.mega2223</groupId>
             <artifactId>aguaLib</artifactId>
-            <version>1.3.2</version>
+            <version>1.3.3</version>
         </dependency>
     </dependencies>
 
