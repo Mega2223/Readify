@@ -1,4 +1,4 @@
-package net.mega2223.readify.windows;
+package net.mega2223.readify.panels;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
@@ -7,14 +7,14 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ImprovedSingleStringSelection extends JPanel {
+public class ImprovedSingleStringSelector extends JPanel {
     JList<Object> selList = new JList();
     JTextField searchBox = null;
     JLabel label = null;
 
-    Object[] fullData;
+    public Object[] fullData;
 
-    ImprovedSingleStringSelection(boolean hasSearchBox, String optionalLabel){
+    public ImprovedSingleStringSelector(boolean hasSearchBox, String optionalLabel){
         setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
         if(optionalLabel != null){
             this.label = new JLabel(optionalLabel);

@@ -16,9 +16,6 @@ public class TimeSpanSelector extends JFrame {
     List<Runnable> conclusionTasks = new ArrayList();
 
     public TimeSpanSelector(){
-
-
-
         JPanel bothColumns = new JPanel();
 
         setLayout(new BorderLayout());
@@ -82,7 +79,7 @@ public class TimeSpanSelector extends JFrame {
                 new AcceptedTimeUnit("Hour",3600),
                 new AcceptedTimeUnit("Minute",60),
                 new AcceptedTimeUnit("Second",1),
-                //new AcceptedTimeUnit("Milis",1/1000),
+                //new AcceptedTimeUnit("Milis",1/1000), honestly should I even support that?
         };
 
         private AcceptedTimeUnit(String timeUnit, double durationInSeconds){

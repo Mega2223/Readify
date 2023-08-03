@@ -3,7 +3,6 @@ package net.mega2223.readify.util;
 import java.text.NumberFormat;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -18,8 +17,9 @@ public class PreRenderingUtils {
         return ret;
     }
 
+    @SuppressWarnings("rawtypes") //FOR THE LOVE OF GOD STOP COMPLAINING ABOUT IT
     public static List<String>[] genSubsForGraph(double[][][] data, double[] stepFraction, List<Date> dates) {
-        List<String>[] ret = new List[2];
+        ArrayList[] ret = new ArrayList[2];
         ret[0] = new ArrayList<>();
         ret[1] = new ArrayList<>();
 
@@ -37,6 +37,7 @@ public class PreRenderingUtils {
         int c = 0;
         for (double i = miX; i <= maX; i += step[0]) {
             Date ac = dates.get(c % dates.size());
+            //noinspection deprecation
             ret[0].add((ac.getDay()+1) + "/" + (ac.getMonth()+1) + "/" + (ac.getYear() + 1900));
             c++;
         }

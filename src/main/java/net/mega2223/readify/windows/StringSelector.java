@@ -5,14 +5,14 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StringSelectionWindow extends JFrame {
-
+@Deprecated
+public class StringSelector extends JFrame {
 
     String[] selection;
     public JCheckBox boxes[];
     public JButton confirmationButton = new JButton("Done!");
 
-    public StringSelectionWindow(String initialPrompt, String[] array){
+    public StringSelector(String initialPrompt, String[] array){
         JPanel panel = new JPanel(new GridLayout(array.length+2,1));
         JScrollPane scroll = new JScrollPane(panel);
         selection = array;
@@ -22,7 +22,6 @@ public class StringSelectionWindow extends JFrame {
         //panel.add(confirmationButton);
         panel.add(confirmationButton);
         setVisible(true);
-
         pack();
     }
 

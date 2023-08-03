@@ -1,14 +1,13 @@
-import net.mega2223.readify.windows.StringSelectionWindow;
+import net.mega2223.readify.windows.StringSelector;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.util.Arrays;
 
 public class StringSelectionWindowTest {
     public static void main(String[] args) {
         String eba[] = {"t1","t2","t2t2"};
-        StringSelectionWindow window = new StringSelectionWindow("SELECIONE",eba);
+        StringSelector window = new StringSelector("SELECIONE",eba);
         JCheckBox[] boxes = window.boxes;
         for (int i = 0; i < boxes.length; i++) {
             boxes[i].addChangeListener(new ChangeListener() {

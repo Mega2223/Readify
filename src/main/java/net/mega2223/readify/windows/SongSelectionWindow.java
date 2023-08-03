@@ -1,6 +1,7 @@
 package net.mega2223.readify.windows;
 
 import net.mega2223.readify.objects.SongHistory;
+import net.mega2223.readify.panels.ImprovedSingleStringSelector;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,8 +21,8 @@ public class SongSelectionWindow extends JFrame {
         private PseudoArtist(String name,List<String> songs){this.name = name; this.songs = songs;}
     }
 
-    ImprovedSingleStringSelection artistSelectionList;
-    ImprovedSingleStringSelection songSelectionList;
+    ImprovedSingleStringSelector artistSelectionList;
+    ImprovedSingleStringSelector songSelectionList;
     JList<String> selectedSongsL = new JList<>();
 
     JPanel internalPanel;
@@ -43,9 +44,9 @@ public class SongSelectionWindow extends JFrame {
         //JFrame logic
         internalPanel = new JPanel(new GridLayout(1,3));
         internalPanel.add(pl);internalPanel.add(pm);internalPanel.add(pr);
-        artistSelectionList = new ImprovedSingleStringSelection(true,"Select your artist.");
+        artistSelectionList = new ImprovedSingleStringSelector(true,"Select your artist.");
         artistSelectionList.setData(sortedArtists);
-        songSelectionList = new ImprovedSingleStringSelection(true,"Select the song.");
+        songSelectionList = new ImprovedSingleStringSelector(true,"Select the song.");
         pl.add(artistSelectionList);
         pm.setLayout(new BoxLayout(pm,BoxLayout.Y_AXIS));
         pm.add(songSelectionList);

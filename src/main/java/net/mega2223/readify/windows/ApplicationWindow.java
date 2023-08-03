@@ -3,15 +3,13 @@ package net.mega2223.readify.windows;
 import net.mega2223.readify.objects.SongHistory;
 import net.mega2223.readify.objects.Track;
 import net.mega2223.readify.util.DataInterpreter;
+import net.mega2223.readify.util.GraphGenerator;
 import net.mega2223.readify.util.JsonConverter;
 import net.mega2223.readify.util.Misc;
-import net.mega2223.readify.util.PreRenderingUtils;
-import net.mega2223.utils.objects.GraphBuilder;
 import net.mega2223.utils.objects.GraphRenderer;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.text.AttributeSet;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -42,7 +40,7 @@ public class ApplicationWindow extends JFrame {
     public JMenuItem specificArtistGraphs = new JMenuItem("Generate graphic from a set of artists");
     public JMenuItem specificSongGraphs = new JMenuItem("Generate graphic from a specific set of songs");
     public JMenuItem genOverallListeningTime = new JMenuItem("Generate graphic from overall listening time");
-    public JMenu stats = new JMenu("Stats");
+    public JMenu statsJM = new JMenu("Stats");
     public JMenuItem sortArtistsByTimePlayed = new JMenuItem("Sort artists by time played");
     public JMenuItem sortSongsByTimePlayed = new JMenuItem("Sort songs by time played");
 
@@ -52,19 +50,7 @@ public class ApplicationWindow extends JFrame {
             File[] files = importFiles();
             int songEstimate = files.length * 10000;
             int fileSizeEstimate = songEstimate * 6;
-            /*for (int i = 0; i < files.length; i++) {
-                //generates song estimate based on size of all arrays from all selected files
-                File act = files[i];
-                 this is too slow lol
-                try {
-                    songEstimate += JsonParser.parseString(Misc.readFromFile(act)).getAsJsonArray().size();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }*/
-            JLabel stats = new JLabel();
-            centralCanvas.removeAll();
-            centralCanvas.add(stats);
+
             JLabel updateStatus = new JLabel("Loading songs...");
             JProgressBar progressBar = new JProgressBar(0, fileSizeEstimate);
             JPanel panel = new JPanel(new GridLayout(2, 1));
@@ -76,21 +62,19 @@ public class ApplicationWindow extends JFrame {
             Thread loadingThread = new Thread(() -> {
                 for (int i = 0; i < files.length; i++) {
                     File act = files[i];
-                    stats.setText("Loading file " + act.getName() + "...");
+                    setStatus("Loading file " + act.getName() + "...",false);
                     try {
                         String fileData = Misc.readFromFile(act, () -> {
                             progressBar.setValue(counts[1]);
                             updateStatus.setText("Estimated progress: " + (int) ((double) counts[1] / (double) fileSizeEstimate * 100) + "%");
                             counts[1]++;
                         });
-                        stats.setText("Compiling songs...");
+                        statsJM.setText("Compiling songs...");
                         SongHistory tracks = JsonConverter.convertFromStreamingHistoryFormat(fileData, () -> {
                             progressBar.setValue(counts[0]);
                             updateStatus.setText("Estimated progress: " + (int) ((double) counts[0] / (double) songEstimate * 100) + "%");
                             counts[0]++;
-                        }, () -> {
-                            centralCanvas.removeAll();
-                        });
+                        }, () -> centralCanvas.remove(panel));
                         songHistory.loadSongs(tracks);
                     } catch (IOException | ParseException ex) {
                         ex.printStackTrace();
@@ -135,32 +119,16 @@ public class ApplicationWindow extends JFrame {
                 Date old = songHistory.getOldest().getEndTime();
                 Date nu = songHistory.getLatest().getEndTime();
 
-
                 double[][][] data = DataInterpreter.genTotalTimeListenedData(songHistory,(long)(sel.getTimeInSeconds()*1000));
+                BufferedImage graph = GraphGenerator.genFullGraphAndCaptionsFromData(data,new int[]{10,10},old,nu,currentFont,800,500);
 
-                long dateRange = Math.abs(old.getTime() - nu.getTime());
-                List<Color> col = genColorList(1);
-                List<String>[] subs = PreRenderingUtils.genSubsForGraph(data,new double[]{.1,.1}, PreRenderingUtils.genDates(old, nu, dateRange / 10));
-                double[] dataBounds = DataInterpreter.getDataBounds(data);
-                double[] interval = {
-                        Math.abs(dataBounds[0] - dataBounds[1])/10,
-                        Math.abs(dataBounds[2] - dataBounds[3])/10
-                };
-                BufferedImage graph = DataInterpreter.genFullGraphAndCaptionsFromData(data,new int[]{10,10},old,nu,currentFont,800,500);
-                //DataInterpreter.debugData(data);
-
-                centralCanvas.removeAll();
-                JLabel stats = new JLabel();
-                centralCanvas.add(stats);
-
-                stats.setVerticalTextPosition(SwingConstants.BOTTOM);
-                stats.setHorizontalTextPosition(SwingConstants.CENTER);
-                stats.setIcon(new ImageIcon(graph));
+                statusLabel.setVerticalTextPosition(SwingConstants.BOTTOM);
+                statusLabel.setHorizontalTextPosition(SwingConstants.CENTER);
 
                 String repor = "All songs you listened during the span from " + old + " to " + nu +
                         ".\nThe numbers in the vertical axis represent roughly one interval of " + totalUnits + " full "+ unit.toLowerCase() +".";
-                repor = HTMLize(repor);
-                stats.setText(repor);
+                setStatus(repor,true);
+                statusLabel.setIcon(new ImageIcon(graph));
                 pack();
                 invalidate();
             });
@@ -173,8 +141,8 @@ public class ApplicationWindow extends JFrame {
             //Collections.sort(artists);
             artists = songHistory.sortBasedOnArtistPopularity(artists);
             //System.out.println(artists);
-            artists.toArray(arr);
-            StringSelectionWindow artistSelectionWindow = new StringSelectionWindow("Select the artists that you wish to visually represent:", arr);
+            artists.toArray(arr); //todo redo of artist selection window
+            StringSelector artistSelectionWindow = new StringSelector("Select the artists that you wish to visually represent:", arr);
             artistSelectionWindow.confirmationButton.addActionListener(e1 -> {
                 List<String> selected = artistSelectionWindow.getSelected();
                 List<SongHistory> histories = new ArrayList<>();
@@ -184,19 +152,9 @@ public class ApplicationWindow extends JFrame {
                     SongHistory songsFromArtist = songHistory.getSongsFromArtist(ac);
                     histories.add(songsFromArtist);
                 }
-                Date old = histories.get(0).getOldest().getEndTime();
-                Date nu = histories.get(0).getLatest().getEndTime();
-                for (int i = 0; i < histories.size(); i++) {
-                    SongHistory act = histories.get(i);
-                    Date oldestEndTime = act.getOldest().getEndTime();
-                    if (oldestEndTime.before(old)){old = oldestEndTime;}
-                    Date newestEndTime = act.getLatest().getEndTime();
-                    if (newestEndTime.after(nu)){nu = newestEndTime;}
-                }
+
                 artistSelectionWindow.dispose();
                 TimeSpanSelector selector = new TimeSpanSelector();
-                Date finalOld = old;
-                Date finalNu = nu;
                 selector.addConclusionTask(() -> {
                     double wideInSecs = selector.getTimeInSeconds();
                     double unadaptedAmount = selector.getTimeInSelectedTimeUnit();
@@ -210,39 +168,25 @@ public class ApplicationWindow extends JFrame {
                         int r = act.getRed();
                         int g = act.getGreen();
                         int b = act.getBlue();
-                        Color newColor = new Color(r, g, b);
                         String infoDisplay = artist + " (Minutes listened per each " + unadaptedAmount + " " + timeUnit.timeUnit.toLowerCase();
                         if(unadaptedAmount != 1.0){infoDisplay += "s";}
                         infoDisplay += ")";
                         JLabel timeListened = new JLabel(infoDisplay);
-                        timeListened.setIcon(new ImageIcon(Misc.generateMonochromaticImage(10, 10, newColor)));
+                        timeListened.setIcon(new ImageIcon(Misc.generateMonochromaticImage(10, 10, act)));
                         timeListened.setHorizontalAlignment(SwingConstants.RIGHT);
                         timeListened.setVerticalTextPosition(SwingConstants.CENTER);
                         colorIndexPanel.add(timeListened);
                     }
                     //statusCanvas.add(colorIndexPanel,BorderLayout.WEST);
-
-                    List<List<double[]>> data = genRendererDataBasedOnTimeSpan(histories, wideInSecs);
-
-                    JLabel stats = new JLabel();
-                    centralCanvas.removeAll();
-                    centralCanvas.add(stats);
                     centralCanvas.add(colorIndexPanel);
-
-                    double[] gridIndex = {0,0};
-
-                    for (List<double[]> dataAct : data) {
-                        for(double[] dataActAct : dataAct){
-                            if(dataActAct[0]>gridIndex[0]*10){gridIndex[0] = dataActAct[0]/10;}
-                            if(dataActAct[1]>gridIndex[1]*10){gridIndex[1] = dataActAct[1]/10;}
-                        }
-                    }
-
-                    GraphRenderer renderer = new GraphRenderer(data, new Dimension(DEFAULT_GRAPH_DIMENSIONS[0], DEFAULT_GRAPH_DIMENSIONS[1]), colors);
-                    stats.setIcon(new ImageIcon(renderer.renderWithGridAndNumberNotation(new ArrayList<>(),gridIndex)));//fixme
-                    stats.setText("All data from the selected artists between " + finalOld + " and " + finalNu);
-                    stats.setHorizontalTextPosition(SwingConstants.CENTER);
-                    stats.setVerticalTextPosition(SwingConstants.BOTTOM);
+                    Date[] bounds = DataInterpreter.getOldestAndLatestDates(histories);
+                    System.out.println(bounds[0] + " : " + bounds[1]);
+                    double[][][] data = DataInterpreter.genFromASetOfArtists(songHistory,selected,Math.abs(bounds[0].getTime()-bounds[1].getTime())/10);
+                    DataInterpreter.debugData(data);
+                    statusLabel.setIcon(new ImageIcon(GraphGenerator.genFullGraphFromData(data,new int[]{10,10},bounds[0],bounds[1],currentFont,800,500)));
+                    statusLabel.setText("All data from the selected artists.");
+                    statusLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+                    statusLabel.setVerticalTextPosition(SwingConstants.BOTTOM);
                 });
             });
 
@@ -356,12 +300,12 @@ public class ApplicationWindow extends JFrame {
         importer.add(fromUserHistory);
         importer.add(clearSharedSongList);
 
-        stats.add(sortArtistsByTimePlayed);
-        stats.add(sortSongsByTimePlayed);
+        statsJM.add(sortArtistsByTimePlayed);
+        statsJM.add(sortSongsByTimePlayed);
 
         jMenuBar.add(importer);
         jMenuBar.add(visuals);
-        jMenuBar.add(stats);
+        jMenuBar.add(statsJM);
 
         BorderLayout layout = new BorderLayout(3, 3);
         //layout.setAlignment(FlowLayout.CENTER);
@@ -374,12 +318,6 @@ public class ApplicationWindow extends JFrame {
         setVisible(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-    }
-
-    public static List<List<double[]>> genRendererDataBasedOnTimeSpan(SongHistory songHistory, double loopFrequencyInSeconds) {
-        ArrayList l = new ArrayList();
-        l.add(songHistory);
-        return genRendererDataBasedOnTimeSpan(l, loopFrequencyInSeconds);
     }
 
     public static List<List<double[]>> genRendererDataBasedOnTimeSpan(List<SongHistory> songHistories, double loopFrequencyInSeconds) {
@@ -446,7 +384,14 @@ public class ApplicationWindow extends JFrame {
         return Double.parseDouble(JOptionPane.showInputDialog(message));
     }
 
+    public void setStatus(String text, boolean htmlize){
+        statusLabel.setIcon(null);
+        if(htmlize){text = Misc.HTMLize(text);}
+        statusLabel.setText(text);
+    }
+
     public void refreshSongStats() {
+        statusLabel.setIcon(null);
         statusLabel.setText(generateStatReport(true));
         invalidate();
     }

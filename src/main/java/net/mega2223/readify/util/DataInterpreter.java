@@ -2,14 +2,10 @@ package net.mega2223.readify.util;
 
 import net.mega2223.readify.objects.SongHistory;
 import net.mega2223.readify.objects.Track;
-import net.mega2223.utils.objects.GraphBuilder;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import static net.mega2223.readify.util.Misc.genColorList;
 
 public class DataInterpreter {
 
@@ -36,44 +32,31 @@ public class DataInterpreter {
             ret[0][iT] = new double[]{i,timeListened};
             iT++;
         }
-        double sm = ret[0][0][0];
-
-        for (int i = 0; i < ret[0].length; i++) {
-            sm = Math.min(sm,ret[0][i][0]);
-            double time = ret[0][i][0];
-            double timesListened = ret[0][i][1];
-            //System.out.println(time + ":" + timesListened);
-        }
-        //fixme data won't show properly unless this is done, likely a rouding issue in aguaLib
-
-
         return ret;
     }
 
-    public static BufferedImage genFullGraphFromData(double[][][] data, int[] numberOfLines, Date oldest, Date latest, Font font, int sX, int sY){
-        long dateRange = Math.abs(oldest.getTime()-latest.getTime());
-        List<Color> col = genColorList(1);
-        BufferedImage graph = GraphBuilder.buildPureGraph(data, col,sX,sY);
-        List<Date> datesToSub = PreRenderingUtils.genDates(oldest, latest, dateRange / numberOfLines[0]);
-        double[] dataBounds = getDataBounds(data);
-        double[] interval = {
-                Math.abs(dataBounds[X_MIN] - dataBounds[X_MAX])/numberOfLines[0], Math.abs(dataBounds[Y_MIN] - dataBounds[Y_MAX])/numberOfLines[1]
-        };
-        GraphBuilder.buildAuxiliarLines(graph, data, Color.gray, interval);
-        return graph;
-    }
-
-    public static BufferedImage genFullGraphAndCaptionsFromData(double [][][] data, int[] numberOfLines, Date oldest, Date latest, Font font, int sX, int sY){
-        long dateRange = Math.abs(oldest.getTime()-latest.getTime());
-        List<Color> col = genColorList(1);
-        List<Date> datesToSub = PreRenderingUtils.genDates(oldest, latest, dateRange / numberOfLines[0]);
-        double[] dataBounds = getDataBounds(data);
-        double[] interval = {
-                Math.abs(dataBounds[X_MIN] - dataBounds[X_MAX])/numberOfLines[0], Math.abs(dataBounds[Y_MIN] - dataBounds[Y_MAX])/numberOfLines[1]
-        };
-        List<String>[] subs = PreRenderingUtils.genSubsForGraph(data,new double[]{.1,.1}, datesToSub);
-
-        return GraphBuilder.generateGraphAndSubs(data,col,sX,sY,interval,font,GraphBuilder.DIRECTION_LEFT,GraphBuilder.DIRECTION_DOWN,subs[0],subs[1],sX/8,Color.gray,Color.black);
+    public static double[][][] genFromASetOfArtists(SongHistory history, List<String> artists, long songIntervalMilis){
+        List<SongHistory> histories = new ArrayList<>();
+        for (String ac : artists){
+            histories.add(history.getSongsFromArtist(ac));
+        }
+        Date[] bounds = getOldestAndLatestDates(histories);
+        int EAL = (int) (Math.abs(bounds[0].getTime() - bounds[1].getTime())/songIntervalMilis);
+        double[][][] ret = new double[artists.size()][EAL][];
+        int c = 0;
+        for (long i = bounds[0].getTime(); i < bounds[1].getTime(); i += songIntervalMilis){
+            for (int h = 0; h < histories.size(); h++){
+                SongHistory act = histories.get(h);
+                List<Track> listens = act.getAllSongsInRange(i,songIntervalMilis/2);
+                long timeListened = 0;
+                for(Track ac : listens){
+                    timeListened += ac.getMsPlayed();
+                }
+                ret[h][c] = new double[]{i,timeListened};
+            }
+            c++;
+        }
+        return ret;
     }
 
     protected static final int X_MIN = 0, X_MAX = 1, Y_MIN = 2, Y_MAX = 3;
@@ -107,7 +90,6 @@ public class DataInterpreter {
         }
         return dataClone;
     }
-
     public static void debugData(double[][][] data){
         System.out.println("DATA OBJECT: \n\n");
         for (int i = 0; i < data.length; i++) {
@@ -116,5 +98,16 @@ public class DataInterpreter {
                 System.out.print("P" + j + ": [" + data[i][j][0] + "\\" + data[i][j][1] + "] ");
             }
         }
+    }
+    public static Date[] getOldestAndLatestDates(List<SongHistory> histories){
+        Date old = histories.get(0).getOldest().getEndTime();
+        Date newe = histories.get(0).getLatest().getEndTime();
+        for (int i = 1; i < histories.size(); i++) {
+            Date acO = histories.get(i).getOldest().getEndTime();
+            Date acL = histories.get(i).getLatest().getEndTime();
+            if(old.after(acO)){old = acO;}
+            if(newe.before(acL)){newe = acL;}
+        }
+        return new Date[]{old,newe};
     }
 }
