@@ -8,9 +8,8 @@ public class SongHistory implements Iterable{
 
     ArrayList<Track> tracks = new ArrayList<>();
 
-    public SongHistory(){
-
-    }
+    public SongHistory(){}
+    public SongHistory(List<Track> tracks){this.tracks.addAll(tracks);}
     //risks an IntegerOverflow
     public int getTotalTimeListenedMilis(){
         int count = 0;
@@ -105,6 +104,7 @@ public class SongHistory implements Iterable{
         }
         return ret;
     }
+
     /**Does not repeat the same song twice, song duration equals the sum of all milis listened to this song*/
     public List<Track> getSongs(){
         List<Track> out = new ArrayList<>();

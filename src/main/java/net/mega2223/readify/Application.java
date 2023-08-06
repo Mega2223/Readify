@@ -14,8 +14,8 @@ public class Application {
      * TODO LIST:
      * Halt data from a specific interval (Maybe an entire data-handling category?)
      * Code cleanup
-     * Use only one single status JLabel at ApplicationWindow
-     * Update all options to new graph building class
+     * Unified status update method
+     * Update all options to new graph building class (done)
      * Demonstration of stats for the readme.md
      * Create logo and social media preview for GitHub repo
      * Create Icon

@@ -13,6 +13,7 @@ public class SongSelectionWindow extends JFrame {
     String[] sortedArtists;
     ArrayList<PseudoArtist> pseudoArtists;
     List<String> currentArtistSongs;
+    List<Runnable> conclusionTasks = new ArrayList<>();
 
     ArrayList<String[]> selectedSongs = new ArrayList<>();
 
@@ -36,7 +37,7 @@ public class SongSelectionWindow extends JFrame {
 
     BoxLayout layout;
 
-    public SongSelectionWindow(String[] sortedArtists, SongHistory context, Runnable onEnd){
+    public SongSelectionWindow(String[] sortedArtists, SongHistory context){
         this.sortedArtists = sortedArtists;
         pseudoArtists = new ArrayList<>(sortedArtists.length);
         for (String sortedArtist : sortedArtists) {
@@ -59,9 +60,7 @@ public class SongSelectionWindow extends JFrame {
         pr.add(removeLabel);
         pr.add(new JScrollPane(selectedSongsJL));
         pr.add(removeButton);
-        endButton.addActionListener(e -> {
-            if(onEnd!=null){onEnd.run();}
-        });
+        endButton.addActionListener(e -> {for(Runnable ac : conclusionTasks){ac.run();} dispose();});
         layout = new BoxLayout(this.getContentPane(),BoxLayout.Y_AXIS);
         this.getContentPane().setLayout(layout);
         add(internalPanel);
@@ -112,6 +111,10 @@ public class SongSelectionWindow extends JFrame {
             assembled[i] = toS[i][0] + " - " + toS[i][1];
         }
         selectedSongsJL.setListData(assembled);
+    }
+
+    public void addConclusionTask(Runnable task){
+        conclusionTasks.add(task);
     }
 
 

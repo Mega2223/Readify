@@ -33,6 +33,7 @@ public class DataInterpreter {
             ret[0][iT] = new double[]{i,timeListened};
             iT++;
         }
+        preventNullValues(ret);
         return ret;
     }
 
@@ -41,9 +42,6 @@ public class DataInterpreter {
         for (String ac : artists){
             histories.add(history.getSongsFromArtist(ac));
         }
-        //todo falta a legenda bobão
-        //also tira as legendinhas quando acabar
-        //acho melhor criar um subcanvas, ou sla, resolve aí eu do futuro kk
         Date[] bounds = getOldestAndLatestDates(histories);
         int EAL = (int) (Math.abs(bounds[0].getTime() - bounds[1].getTime())/songIntervalMilis);
         double[][][] ret = new double[artists.size()][EAL+1][];
@@ -60,6 +58,33 @@ public class DataInterpreter {
             }
             c++;
         }
+        preventNullValues(ret);
+        return ret;
+    }
+
+    public static double[][][] genFromASetOfSongs(SongHistory history, List<String[]> songs, long songIntervalMilis){
+        List<SongHistory> histories = new ArrayList<>(songs.size());
+        for(int i = 0; i < songs.size(); i++){
+            String[] song = songs.get(i);
+            histories.add(new SongHistory(history.getListensForThisSong(song[1],song[0])));
+        }
+        Date[] bounds = getOldestAndLatestDates(histories);
+        int EAL = (int) (Math.abs(bounds[0].getTime() - bounds[1].getTime())/songIntervalMilis);
+        double[][][] ret = new double[histories.size()][EAL+1][];
+        int c = 0;
+        for (long i = bounds[0].getTime(); i < bounds[1].getTime(); i += songIntervalMilis){
+            for (int h = 0; h < histories.size(); h++){
+                SongHistory act = histories.get(h);
+                List<Track> listens = act.getAllSongsInRange(i,songIntervalMilis/2);
+                long timeListened = 0;
+                for(Track ac : listens){
+                    timeListened += ac.getMsPlayed();
+                }
+                ret[h][c] = new double[]{i,timeListened};
+            }
+            c++;
+        }
+        preventNullValues(ret);
         return ret;
     }
 
@@ -113,5 +138,14 @@ public class DataInterpreter {
             if(newe.before(acL)){newe = acL;}
         }
         return new Date[]{old,newe};
+    }
+    private static void preventNullValues(double[][][] data){
+        for (int l = 0; l < data.length; l++) {
+            double[] prev = data[l][0];
+            for (int p = 0; p < data.length; p++) {
+                if(data[l][p] == null){data[l][p] = prev;}
+                prev = data[l][p];
+            }
+        }
     }
 }

@@ -138,7 +138,7 @@ public class ApplicationWindow extends JFrame {
         });
         specificArtistGraphs.addActionListener(e -> {
             List<String> artists = songHistory.getArtists();
-            String arr[] = new String[artists.size()];
+            String[] arr = new String[artists.size()];
             artists = songHistory.sortBasedOnArtistPopularity(artists);
             artists.toArray(arr); //todo redo of artist selection window
 
@@ -199,10 +199,40 @@ public class ApplicationWindow extends JFrame {
             List<String> artists = songHistory.getArtists();
             String[] artistsArray = new String[artists.size()];
             artists.toArray(artistsArray);
-            SongSelectionWindow songSelectionWindow = new SongSelectionWindow(artistsArray, songHistory,
-                    () -> {
-                        //todo
-                    });
+
+            SongSelectionWindow songSelectionWindow = new SongSelectionWindow(artistsArray, songHistory);
+            songSelectionWindow.addConclusionTask(() -> {
+                List<String[]> selectedSongs = songSelectionWindow.getSelectedSongsPure();
+                TimeSpanSelector sel = new TimeSpanSelector();
+                sel.addConclusionTask(()->{
+                    long timeIntervalMilis = (long) (sel.getTimeInSeconds()*1000);
+                    double timeInUnit = sel.getTimeInSelectedTimeUnit();
+                    double[][][] data = DataInterpreter.genFromASetOfSongs(songHistory,selectedSongs,timeIntervalMilis);
+
+                    double[] dataBounds = DataInterpreter.getDataBounds(data);
+                    Date old = new Date((long) dataBounds[0]);
+                    Date nu = new Date((long) dataBounds[1]);
+
+                    List<Color> colors = genColorList(data.length);
+
+                    JPanel captionPanel = new JPanel(new GridLayout(0, 1));
+                    String timeAmount;
+                    if(timeInUnit == Math.floor(timeInUnit)){timeAmount = (int) timeInUnit + "";} else {timeAmount = timeInUnit + "";}
+                    for (int i = 0; i < selectedSongs.size(); i++) {
+                        StringBuilder labelText = new StringBuilder();
+                        String[] act = selectedSongs.get(i);
+                        labelText.append(act[1]).append(" - ").append(act[0]).append(" (Minutes listened in a ").append(timeAmount).append(" ").append(sel.getSelectedTimeUnit().timeUnit).append(" interval)");
+                        JLabel ac = new JLabel(labelText.toString());
+                        ac.setIcon(new ImageIcon(Misc.generateMonochromaticImage(10,10,colors.get(i))));
+                        captionPanel.add(ac);
+                    }
+
+                    BufferedImage graph = GraphGenerator.genFullGraphAndCaptionsFromData(data,new int[]{10,10},old,nu,currentFont,800,500,colors);
+                    statusLabel.setIcon(new ImageIcon(graph));
+                    centralCanvas.add(captionPanel);
+                    sel.dispose();
+                });
+            });
         });
         sortArtistsByTimePlayed.addActionListener(e -> {
             class SortingFrame extends JFrame{
