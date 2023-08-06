@@ -12,14 +12,16 @@ import java.text.ParseException;
 public class Application {
     /**
      * TODO LIST:
-     * Halt data from a specific interval
+     * Halt data from a specific interval (Maybe an entire data-handling category?)
      * Code cleanup
      * Use only one single status JLabel at ApplicationWindow
      * Update all options to new graph building class
      * Demonstration of stats for the readme.md
      * Create logo and social media preview for GitHub repo
      * Create Icon
-     * Add font options
+     * Add font configuring to the frontend (font chooser and parameter)
+     * Perhaps a saveable settings file might help?
+     * Data overview board
      * */
     public static void main(String[] args) throws IOException, ParseException {
         ApplicationWindow window = new ApplicationWindow();

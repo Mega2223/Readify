@@ -19,10 +19,7 @@ public class PreRenderingUtils {
 
     @SuppressWarnings("rawtypes") //FOR THE LOVE OF GOD STOP COMPLAINING ABOUT IT
     public static List<String>[] genSubsForGraph(double[][][] data, double[] stepFraction, List<Date> dates) {
-        ArrayList[] ret = new ArrayList[2];
-        ret[0] = new ArrayList<>();
-        ret[1] = new ArrayList<>();
-
+        ArrayList[] ret = {new ArrayList<String>(),new ArrayList<String>()};
         double miX = data[0][0][0], maX = data[0][0][0], miY = data[0][0][1], maY = data[0][0][1];
         for (int l = 0; l < data.length; l++) {
             for (int p = 0; p < data[l].length; p++) {
@@ -33,7 +30,6 @@ public class PreRenderingUtils {
             }
         }
         double[] step = {Math.abs(maX-miX)*stepFraction[0],Math.abs(maY-miY)*stepFraction[1]};
-
         int c = 0;
         for (double i = miX; i <= maX; i += step[0]) {
             Date ac = dates.get(c % dates.size());
@@ -45,7 +41,7 @@ public class PreRenderingUtils {
         NumberFormat format = NumberFormat.getInstance();
         format.setMaximumFractionDigits(2);
         for (double i = miY; i <= maY; i += step[1]) {
-            ret[1].add(format.format(c));
+            ret[1].add(format.format(i));
             c++;
         }
 

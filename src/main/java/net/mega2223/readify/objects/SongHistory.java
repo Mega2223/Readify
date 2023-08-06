@@ -200,9 +200,12 @@ public class SongHistory implements Iterable{
     }
 
     public List<String> sortBasedOnArtistPopularity(List<String> artists){
+        return sortBasedOnArtistPopularity(artists,false);
+    }
+    public List<String> sortBasedOnArtistPopularity(List<String> artists, boolean ascending){
         class ComparableArtist implements Comparable{
-            public int sortingCriteria;
-            public String artist;
+            public final int sortingCriteria;
+            public final String artist;
             public ComparableArtist(String artist, int sortingCriteria){this.artist = artist; this.sortingCriteria = sortingCriteria;}
             public int compareTo(Object o) {
                 if(o instanceof ComparableArtist){
@@ -227,9 +230,8 @@ public class SongHistory implements Iterable{
             comparableArtists.add(new ComparableArtist(artist, (int) listened));
         }
 
-
         Collections.sort(comparableArtists);
-        System.out.println(comparableArtists);
+        if(!ascending){Collections.reverse(comparableArtists);}
         artists.clear();
         for (ComparableArtist act : comparableArtists){
             artists.add(act.artist);

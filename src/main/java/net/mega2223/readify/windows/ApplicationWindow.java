@@ -24,7 +24,6 @@ import static net.mega2223.readify.util.Misc.*;
 
 public class ApplicationWindow extends JFrame {
 
-    public static final int[] DEFAULT_GRAPH_DIMENSIONS = {400, 500};
     public SongHistory songHistory = new SongHistory();
     Font currentFont = new Font("Consolas",Font.PLAIN,10);
 
@@ -37,9 +36,9 @@ public class ApplicationWindow extends JFrame {
     public JMenuItem fromEndSong = new JMenuItem("From EndSongFiles");
     public JMenuItem clearSharedSongList = new JMenuItem("Clear songs");
     public JMenu visuals = new JMenu("Visuals");
-    public JMenuItem specificArtistGraphs = new JMenuItem("Generate graphic from a set of artists");
-    public JMenuItem specificSongGraphs = new JMenuItem("Generate graphic from a specific set of songs");
-    public JMenuItem genOverallListeningTime = new JMenuItem("Generate graphic from overall listening time");
+    public JMenuItem specificArtistGraphs = new JMenuItem("Generate graph from a set of artists");
+    public JMenuItem specificSongGraphs = new JMenuItem("Generate graph from a specific set of songs");
+    public JMenuItem genOverallListeningTime = new JMenuItem("Generate graph from overall listening time");
     public JMenu statsJM = new JMenu("Stats");
     public JMenuItem sortArtistsByTimePlayed = new JMenuItem("Sort artists by time played");
     public JMenuItem sortSongsByTimePlayed = new JMenuItem("Sort songs by time played");
@@ -120,7 +119,7 @@ public class ApplicationWindow extends JFrame {
                 Date nu = songHistory.getLatest().getEndTime();
 
                 double[][][] data = DataInterpreter.genTotalTimeListenedData(songHistory,(long)(sel.getTimeInSeconds()*1000));
-                BufferedImage graph = GraphGenerator.genFullGraphAndCaptionsFromData(data,new int[]{10,10},old,nu,currentFont,800,500);
+                BufferedImage graph = GraphGenerator.genFullGraphAndCaptionsFromData(data,new int[]{10,10},old,nu,currentFont,800,500,genColorList(1));
 
                 statusLabel.setVerticalTextPosition(SwingConstants.BOTTOM);
                 statusLabel.setHorizontalTextPosition(SwingConstants.CENTER);
@@ -138,9 +137,7 @@ public class ApplicationWindow extends JFrame {
         specificArtistGraphs.addActionListener(e -> {
             List<String> artists = songHistory.getArtists();
             String arr[] = new String[artists.size()];
-            //Collections.sort(artists);
             artists = songHistory.sortBasedOnArtistPopularity(artists);
-            //System.out.println(artists);
             artists.toArray(arr); //todo redo of artist selection window
             StringSelector artistSelectionWindow = new StringSelector("Select the artists that you wish to visually represent:", arr);
             artistSelectionWindow.confirmationButton.addActionListener(e1 -> {
@@ -156,20 +153,24 @@ public class ApplicationWindow extends JFrame {
                 artistSelectionWindow.dispose();
                 TimeSpanSelector selector = new TimeSpanSelector();
                 selector.addConclusionTask(() -> {
-                    double wideInSecs = selector.getTimeInSeconds();
-                    double unadaptedAmount = selector.getTimeInSelectedTimeUnit();
+                    final double wideInSecs = selector.getTimeInSeconds();
+                    final double unadaptedAmount = selector.getTimeInSelectedTimeUnit();
                     TimeSpanSelector.AcceptedTimeUnit timeUnit = selector.getSelectedTimeUnit();
                     selector.dispose();
+                    Date[] bounds = DataInterpreter.getOldestAndLatestDates(histories);
+                    double[][][] data = DataInterpreter.genFromASetOfArtists(songHistory,selected, (long) (wideInSecs*1000));
                     JPanel colorIndexPanel = new JPanel(new GridLayout(0, 1));
-                    Color[] colors = genColorArray(selected.size());
+                    List<Color> colors = genColorList(selected.size());
                     for (int i = 0; i < selected.size(); i++) {
                         String artist = selected.get(i);
-                        Color act = colors[i];
-                        int r = act.getRed();
-                        int g = act.getGreen();
-                        int b = act.getBlue();
-                        String infoDisplay = artist + " (Minutes listened per each " + unadaptedAmount + " " + timeUnit.timeUnit.toLowerCase();
+                        Color act = colors.get(i);
+                        String infoDisplay = artist + " (Minutes listened per each TIMEU " + timeUnit.timeUnit.toLowerCase();
                         if(unadaptedAmount != 1.0){infoDisplay += "s";}
+                        if(unadaptedAmount == Math.floor(unadaptedAmount)){
+                            infoDisplay = infoDisplay.replace("TIMEU",(int) unadaptedAmount + "");
+                        } else {
+                            infoDisplay = infoDisplay.replace("TIMEU",unadaptedAmount + "");
+                        }
                         infoDisplay += ")";
                         JLabel timeListened = new JLabel(infoDisplay);
                         timeListened.setIcon(new ImageIcon(Misc.generateMonochromaticImage(10, 10, act)));
@@ -179,11 +180,7 @@ public class ApplicationWindow extends JFrame {
                     }
                     //statusCanvas.add(colorIndexPanel,BorderLayout.WEST);
                     centralCanvas.add(colorIndexPanel);
-                    Date[] bounds = DataInterpreter.getOldestAndLatestDates(histories);
-                    System.out.println(bounds[0] + " : " + bounds[1]);
-                    double[][][] data = DataInterpreter.genFromASetOfArtists(songHistory,selected,Math.abs(bounds[0].getTime()-bounds[1].getTime())/10);
-                    DataInterpreter.debugData(data);
-                    statusLabel.setIcon(new ImageIcon(GraphGenerator.genFullGraphFromData(data,new int[]{10,10},bounds[0],bounds[1],currentFont,800,500)));
+                    statusLabel.setIcon(new ImageIcon(GraphGenerator.genFullGraphAndCaptionsFromData(data,new int[]{10,10},bounds[0],bounds[1],currentFont,800,500,colors)));
                     statusLabel.setText("All data from the selected artists.");
                     statusLabel.setHorizontalTextPosition(SwingConstants.CENTER);
                     statusLabel.setVerticalTextPosition(SwingConstants.BOTTOM);

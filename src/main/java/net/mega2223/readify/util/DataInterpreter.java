@@ -7,9 +7,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/** This class is a bunch of static methods intended to be a middle step between the frontend of the application and the AguaLib renderer.
+ * It compiles SongHistory objects in graph data based on the needs of the application, then returns said data to be made into a graph by the main process.
+ * */
 public class DataInterpreter {
-
-    protected static final int FONT_SIZE = 12;
 
     private DataInterpreter(){}
     public static double[][][] genTotalTimeListenedData(SongHistory history, long songIntervalMilis){
@@ -40,9 +41,12 @@ public class DataInterpreter {
         for (String ac : artists){
             histories.add(history.getSongsFromArtist(ac));
         }
+        //todo falta a legenda bobão
+        //also tira as legendinhas quando acabar
+        //acho melhor criar um subcanvas, ou sla, resolve aí eu do futuro kk
         Date[] bounds = getOldestAndLatestDates(histories);
         int EAL = (int) (Math.abs(bounds[0].getTime() - bounds[1].getTime())/songIntervalMilis);
-        double[][][] ret = new double[artists.size()][EAL][];
+        double[][][] ret = new double[artists.size()][EAL+1][];
         int c = 0;
         for (long i = bounds[0].getTime(); i < bounds[1].getTime(); i += songIntervalMilis){
             for (int h = 0; h < histories.size(); h++){

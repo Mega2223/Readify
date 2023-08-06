@@ -22,7 +22,7 @@ public class Misc {
     }
     public static List<Color> genColorList(int amount){
         Random random = new Random();
-        ArrayList<Color> ret = new ArrayList();
+        ArrayList<Color> ret = new ArrayList<>(amount);
         for (int i = 0; i < amount; i++) {
             Color c = new Color(random.nextInt(256),random.nextInt(256),random.nextInt(256));
             ret.add(c);
