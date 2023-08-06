@@ -6,7 +6,7 @@
 
     <groupId>net.mega2223</groupId>
     <artifactId>Readify</artifactId>
-    <version>DEV-0.4</version>
+    <version>DEV-0.5</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -27,7 +27,7 @@
         <dependency>
             <groupId>net.mega2223</groupId>
             <artifactId>aguaLib</artifactId>
-            <version>1.3.3</version>
+            <version>1.3.4</version>
         </dependency>
     </dependencies>
 

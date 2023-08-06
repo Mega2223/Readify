@@ -31,7 +31,6 @@ public class ApplicationWindow extends JFrame {
 
     //JFrame elements
     public JPanel centralCanvas = new JPanel();
-    public JLabel statusLabel = new JLabel(generateStatReport(true));
     public JMenuBar jMenuBar = new JMenuBar();
     public JMenu importer = new JMenu("Import");
     public JMenuItem fromUserHistory = new JMenuItem("From StreamHistory files");
@@ -85,6 +84,7 @@ public class ApplicationWindow extends JFrame {
                 remove(panel);
                 refreshSongStats();
             });
+            centralCanvas.removeAll();
             centralCanvas.add(panel);
             loadingThread.start();
         });
@@ -123,13 +123,15 @@ public class ApplicationWindow extends JFrame {
                 double[][][] data = DataInterpreter.genTotalTimeListenedData(songHistory,(long)(sel.getTimeInSeconds()*1000));
                 BufferedImage graph = GraphGenerator.genFullGraphAndCaptionsFromData(data,new int[]{10,10},old,nu,currentFont,800,500,genColorList(1));
 
-                statusLabel.setVerticalTextPosition(SwingConstants.BOTTOM);
-                statusLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+                JLabel label = new JLabel();
+                label.setVerticalTextPosition(SwingConstants.BOTTOM);
+                label.setHorizontalTextPosition(SwingConstants.CENTER);
 
                 String repor = "All songs you listened during the span from " + old + " to " + nu +
                         ".\nThe numbers in the vertical axis represent roughly one interval of " + totalUnits + " full "+ unit.toLowerCase() +".";
                 setStatus(repor,true);
-                statusLabel.setIcon(new ImageIcon(graph));
+                label.setIcon(new ImageIcon(graph));
+                centralCanvas.add(label);
                 pack();
                 invalidate();
             });
@@ -181,16 +183,22 @@ public class ApplicationWindow extends JFrame {
                         infoDisplay += ")";
                         JLabel timeListened = new JLabel(infoDisplay);
                         timeListened.setIcon(new ImageIcon(Misc.generateMonochromaticImage(10, 10, act)));
-                        timeListened.setHorizontalAlignment(SwingConstants.RIGHT);
+                        timeListened.setHorizontalAlignment(SwingConstants.CENTER);
                         timeListened.setVerticalTextPosition(SwingConstants.CENTER);
                         colorIndexPanel.add(timeListened);
                     }
                     //statusCanvas.add(colorIndexPanel,BorderLayout.WEST);
-                    centralCanvas.add(colorIndexPanel);
+                    centralCanvas.removeAll();
+                    JLabel statusLabel = new JLabel();
                     statusLabel.setIcon(new ImageIcon(GraphGenerator.genFullGraphAndCaptionsFromData(data,new int[]{10,10},bounds[0],bounds[1],currentFont,800,500,colors)));
                     statusLabel.setText("All data from the selected artists.");
                     statusLabel.setHorizontalTextPosition(SwingConstants.CENTER);
                     statusLabel.setVerticalTextPosition(SwingConstants.BOTTOM);
+                    statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+                    centralCanvas.add(statusLabel);
+                    centralCanvas.add(colorIndexPanel);
+                    pack();
                 });
             });
 
@@ -228,7 +236,12 @@ public class ApplicationWindow extends JFrame {
                     }
 
                     BufferedImage graph = GraphGenerator.genFullGraphAndCaptionsFromData(data,new int[]{10,10},old,nu,currentFont,800,500,colors);
-                    statusLabel.setIcon(new ImageIcon(graph));
+                    JLabel label = new JLabel(new ImageIcon(graph));
+                    label.setHorizontalTextPosition(SwingConstants.CENTER);
+                    label.setVerticalTextPosition(SwingConstants.BOTTOM);
+                    label.setHorizontalAlignment(SwingConstants.CENTER);
+                    centralCanvas.removeAll();
+                    centralCanvas.add(label);
                     centralCanvas.add(captionPanel);
                     sel.dispose();
                 });
@@ -324,9 +337,6 @@ public class ApplicationWindow extends JFrame {
             sortingFrame.setVisible(true);
         });
 
-
-        centralCanvas.add(statusLabel);
-
         visuals.add(specificArtistGraphs);
         visuals.add(specificSongGraphs);
         visuals.add(genOverallListeningTime);
@@ -347,9 +357,10 @@ public class ApplicationWindow extends JFrame {
         setLayout(layout);
 
         setJMenuBar(jMenuBar);
+        centralCanvas.setLayout(new BoxLayout(centralCanvas,BoxLayout.Y_AXIS));
         add(centralCanvas);//, JFrame.CENTER_ALIGNMENT);
 
-        pack();
+        setSize(500,400);
         setVisible(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -420,14 +431,15 @@ public class ApplicationWindow extends JFrame {
     }
 
     public void setStatus(String text, boolean htmlize){
-        statusLabel.setIcon(null);
+        centralCanvas.removeAll();
         if(htmlize){text = Misc.HTMLize(text);}
-        statusLabel.setText(text);
+        centralCanvas.removeAll();
+        centralCanvas.add(new JLabel(text));
     }
 
     public void refreshSongStats() {
-        statusLabel.setIcon(null);
-        statusLabel.setText(generateStatReport(true));
+        centralCanvas.removeAll();
+        centralCanvas.add(new JLabel(generateStatReport(true)));
         invalidate();
     }
 

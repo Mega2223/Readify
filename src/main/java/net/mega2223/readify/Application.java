@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.text.ParseException;
 
 public class Application {
-    /**
+    /*
      * TODO LIST:
      * Halt data from a specific interval (Maybe an entire data-handling category?)
      * Code cleanup
@@ -27,12 +27,12 @@ public class Application {
         ApplicationWindow window = new ApplicationWindow();
         for (int i = 0; i < args.length; i++) {
             switch (args[i]){
-                case "-es": i++; window.statusLabel.setText("Loading pre-specified endsong files...\nThis may take a minute");
+                case "-es": i++; window.setStatus("Loading pre-specified endsong files...\nThis may take a minute",true);
                     while(args.length > i && args[i].toCharArray()[0] != '-'){
                         window.songHistory.loadSongs(JsonConverter.convertFromEndSongFormat(Misc.readFromFile(new File(args[i]),null)));
                         i++;
                     }
-                case "-sh": i++; window.statusLabel.setText("Loading pre-specified streaming history files...\nThis may take a while");
+                case "-sh": i++; window.setStatus("Loading pre-specified streaming history files...\nThis may take a while",true);
                     while(args.length > i && args[i].toCharArray()[0] != '-'){
                         window.songHistory.loadSongs(JsonConverter.convertFromStreamingHistoryFormat(Misc.readFromFile(new File(args[i]),null)));
                         i++;
