@@ -35,9 +35,7 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId><!-- Maven's complaining of package not found, shouldn't this groupID be assumed by default? -->
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.6.0</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -51,5 +49,6 @@
             </plugin>
         </plugins>
     </build>
+
 
 </project>
