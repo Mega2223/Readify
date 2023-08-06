@@ -41,7 +41,7 @@ public class PreRenderingUtils {
         NumberFormat format = NumberFormat.getInstance();
         format.setMaximumFractionDigits(2);
         for (double i = miY; i <= maY; i += step[1]) {
-            ret[1].add(format.format(i));
+            ret[1].add(format.format(i/60000));
             c++;
         }
 
