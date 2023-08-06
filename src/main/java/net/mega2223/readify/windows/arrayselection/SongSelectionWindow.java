@@ -13,7 +13,8 @@ public class SongSelectionWindow extends JFrame {
     String[] sortedArtists;
     ArrayList<PseudoArtist> pseudoArtists;
     List<String> currentArtistSongs;
-    ArrayList<Object> selectedSongs = new ArrayList<>();
+
+    ArrayList<String[]> selectedSongs = new ArrayList<>();
 
     private static class PseudoArtist{
         String name;
@@ -23,7 +24,7 @@ public class SongSelectionWindow extends JFrame {
 
     ImprovedStringSelector artistSelectionList;
     ImprovedStringSelector songSelectionList;
-    JList<String> selectedSongsL = new JList<>();
+    JList<String> selectedSongsJL = new JList<>();
 
     JPanel internalPanel;
     JPanel pl = new JPanel(), pm = new JPanel(), pr = new JPanel();
@@ -56,7 +57,7 @@ public class SongSelectionWindow extends JFrame {
         removeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         removeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         pr.add(removeLabel);
-        pr.add(new JScrollPane(selectedSongsL));
+        pr.add(new JScrollPane(selectedSongsJL));
         pr.add(removeButton);
         endButton.addActionListener(e -> {
             if(onEnd!=null){onEnd.run();}
@@ -75,15 +76,14 @@ public class SongSelectionWindow extends JFrame {
             List<Object> selected = songSelectionList.getSelectedValues();
             for(Object ac : selected){
                 if(!selectedSongs.contains(ac)){
-                    selectedSongs.add(artistSelectionList.getSelectedValue() + " - " + ac);
-
+                    selectedSongs.add(new String[]{artistSelectionList.getSelectedValue(),ac.toString()});
                 }
             }
             refreshSelectedSongs();
         });
 
         removeButton.addActionListener(e -> {
-            List<String> sel = selectedSongsL.getSelectedValuesList();
+            List<String> sel = selectedSongsJL.getSelectedValuesList();
             selectedSongs.removeAll(sel);
             refreshSelectedSongs();
         });
@@ -95,13 +95,24 @@ public class SongSelectionWindow extends JFrame {
         this.invalidate();
     }
 
+    /**Returns selected songs along with artist names*/
     public Object[] getSelectedSongs(){
         return songSelectionList.fullData;
     }
+    /**Returns a list of segregated strings containing artist name and songs*/
+    public List<String[]> getSelectedSongsPure(){
+        return selectedSongs;
+    }
 
     void refreshSelectedSongs(){
-        String[] toS = new String[selectedSongs.size()];
+        String[][] toS = new String[selectedSongs.size()][];
         selectedSongs.toArray(toS);
-        selectedSongsL.setListData(toS);
+        String[] assembled = new String[toS.length];
+        for (int i = 0; i < toS.length; i++) {
+            assembled[i] = toS[i][0] + " - " + toS[i][1];
+        }
+        selectedSongsJL.setListData(assembled);
     }
+
+
 }
