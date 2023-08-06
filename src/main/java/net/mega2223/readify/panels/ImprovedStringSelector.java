@@ -7,14 +7,14 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ImprovedSingleStringSelector extends JPanel {
+public class ImprovedStringSelector extends JPanel {
     JList<Object> selList = new JList();
     JTextField searchBox = null;
     JLabel label = null;
 
     public Object[] fullData;
 
-    public ImprovedSingleStringSelector(boolean hasSearchBox, String optionalLabel){
+    public ImprovedStringSelector(boolean hasSearchBox, String optionalLabel){
         setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
         if(optionalLabel != null){
             this.label = new JLabel(optionalLabel);
@@ -23,6 +23,7 @@ public class ImprovedSingleStringSelector extends JPanel {
         }
         if(hasSearchBox){
             this.searchBox = new JTextField("",8);
+            this.searchBox.setMaximumSize(new Dimension(200,20));
             add(this.searchBox);
             this.searchBox.addActionListener(e -> {
                 List<Object> filtered = new ArrayList<>(fullData.length);

@@ -2,11 +2,13 @@ package net.mega2223.readify.windows;
 
 import net.mega2223.readify.objects.SongHistory;
 import net.mega2223.readify.objects.Track;
+import net.mega2223.readify.panels.ImprovedStringSelector;
 import net.mega2223.readify.util.DataInterpreter;
 import net.mega2223.readify.util.GraphGenerator;
 import net.mega2223.readify.util.JsonConverter;
 import net.mega2223.readify.util.Misc;
-import net.mega2223.utils.objects.GraphRenderer;
+import net.mega2223.readify.windows.arrayselection.ArtistSelectionWindow;
+import net.mega2223.readify.windows.arrayselection.SongSelectionWindow;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -139,9 +141,14 @@ public class ApplicationWindow extends JFrame {
             String arr[] = new String[artists.size()];
             artists = songHistory.sortBasedOnArtistPopularity(artists);
             artists.toArray(arr); //todo redo of artist selection window
-            StringSelector artistSelectionWindow = new StringSelector("Select the artists that you wish to visually represent:", arr);
-            artistSelectionWindow.confirmationButton.addActionListener(e1 -> {
-                List<String> selected = artistSelectionWindow.getSelected();
+
+            ArtistSelectionWindow artistSelectionWindow = new ArtistSelectionWindow(arr,"Select the artists that you wish to visually represent:","Artist selector");
+
+            artistSelectionWindow.addConclusionTask(() -> {
+                List<Object> sel = artistSelectionWindow.getSelected();
+                List<String> selected = new ArrayList<>();
+                for(Object ac : sel){selected.add(ac.toString());}
+
                 List<SongHistory> histories = new ArrayList<>();
 
                 for (int i = 0; i < selected.size(); i++) {
@@ -187,6 +194,15 @@ public class ApplicationWindow extends JFrame {
                 });
             });
 
+        });
+        specificSongGraphs.addActionListener(e -> {
+            List<String> artists = songHistory.getArtists();
+            String[] artistsArray = new String[artists.size()];
+            artists.toArray(artistsArray);
+            SongSelectionWindow songSelectionWindow = new SongSelectionWindow(artistsArray, songHistory,
+                    () -> {
+                        //todo
+                    });
         });
         sortArtistsByTimePlayed.addActionListener(e -> {
             class SortingFrame extends JFrame{
@@ -277,15 +293,7 @@ public class ApplicationWindow extends JFrame {
             sortingFrame.add(new JList<>(songArray));
             sortingFrame.setVisible(true);
         });
-        specificSongGraphs.addActionListener(e -> {
-            List<String> artists = songHistory.getArtists();
-            String[] artistsArray = new String[artists.size()];
-            artists.toArray(artistsArray);
-            SongSelectionWindow songSelectionWindow = new SongSelectionWindow(artistsArray, songHistory,
-                    () -> {
-                        //todo
-                    });
-        });
+
 
         centralCanvas.add(statusLabel);
 
