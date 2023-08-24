@@ -51,20 +51,20 @@ This repo requires two Maven dependencies to work, [GSON](https://github.com/goo
 Unfortunately i haven't been able to upload aguaLib to Maven Central yet, so you need to clone the repository and execute the maven deploy task yourself in order to solve this dependency.  
 Here is what your pom.xml should absolutely have in order for the application to work:
   ```xml
-  <dependencies>
-        <dependency>
-           <groupId>com.google.code.gson</groupId>
-           <artifactId>gson</artifactId>
-           <version>2.9.1</version>
-        </dependency>
+<dependencies>
+    <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>2.10.1</version>
+    </dependency>
 
-        <dependency>
-           <groupId>net.mega2223</groupId>
-           <artifactId>aguaLib</artifactId>
-           <version>1.2.0</version>
-        </dependency>
-  </dependencies>
-  ```
+    <dependency>
+        <groupId>net.mega2223</groupId>
+        <artifactId>aguaLib</artifactId>
+        <version>1.3.4</version>
+    </dependency>
+</dependencies>
+```
     
 ### 3.2 Builiding an executable jar
     
