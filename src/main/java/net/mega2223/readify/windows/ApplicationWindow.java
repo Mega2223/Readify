@@ -1,8 +1,8 @@
 package net.mega2223.readify.windows;
 
+import net.mega2223.readify.ApplicationState;
 import net.mega2223.readify.objects.SongHistory;
 import net.mega2223.readify.objects.Track;
-import net.mega2223.readify.panels.ImprovedStringSelector;
 import net.mega2223.readify.util.DataInterpreter;
 import net.mega2223.readify.util.GraphGenerator;
 import net.mega2223.readify.util.JsonConverter;
@@ -139,10 +139,11 @@ public class ApplicationWindow extends JFrame {
 
         });
         specificArtistGraphs.addActionListener(e -> {
+            ApplicationState.checkForOngoingTask(true,true);
             List<String> artists = songHistory.getArtists();
             String[] arr = new String[artists.size()];
             artists = songHistory.sortBasedOnArtistPopularity(artists);
-            artists.toArray(arr); //todo redo of artist selection window
+            artists.toArray(arr);
 
             ArtistSelectionWindow artistSelectionWindow = new ArtistSelectionWindow(arr,"Select the artists that you wish to visually represent:","Artist selector");
 
@@ -248,17 +249,9 @@ public class ApplicationWindow extends JFrame {
             });
         });
         sortArtistsByTimePlayed.addActionListener(e -> {
-            class SortingFrame extends JFrame{
-                SortingFrame(){
-                    setSize(100,500);
-                    GridBagLayout manager = new GridBagLayout();
-                    setLayout(manager);
-                    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-                    setVisible(true);
-                }
-            }
+
             class ComparableArtist implements Comparable {
-                String name; long criteriaWeight;
+                final String name; final long criteriaWeight;
                 ComparableArtist(String artist, long criteriaWeight){
                     name = artist; this.criteriaWeight = criteriaWeight;
                 }
@@ -275,8 +268,8 @@ public class ApplicationWindow extends JFrame {
                     return name + ": " + criteriaWeight + " minutes played in total";
                 }
             }
-            
-            SortingFrame sortingFrame = new SortingFrame();
+
+            SortDisplayFrame display = new SortDisplayFrame("Artists sorted by playtime");
             
             List<String> artists = songHistory.getArtists();
             long[] minutesPlayed = new long[artists.size()];
@@ -293,23 +286,16 @@ public class ApplicationWindow extends JFrame {
                 comparableArtists.add(new ComparableArtist(artists.get(i),minutesPlayed[i]));
             }
             Collections.sort(comparableArtists);
-            ComparableArtist[] artistsArray = new ComparableArtist[comparableArtists.size()];
-            comparableArtists.toArray(artistsArray);
-            sortingFrame.add(new JList<>(artistsArray));
+            for (ComparableArtist act : comparableArtists){
+                display.add(act);
+            }
+
             
         });
         sortSongsByTimePlayed.addActionListener(e -> {
-            class SortingFrame extends JFrame{
-                SortingFrame(){
-                    setSize(100,500);
-                    GridBagLayout manager = new GridBagLayout();
-                    setLayout(manager);
-                    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-                    setVisible(true);
-                }
-            }
+            SortDisplayFrame frame = new SortDisplayFrame("Songs sorted by playtime");
             class ComparableSong implements Comparable {
-                String name; long criteriaWeight;
+                final String name; final long criteriaWeight;
                 ComparableSong(String name, long criteriaWeight){
                     this.name = name; this.criteriaWeight = criteriaWeight;
                 }
@@ -332,9 +318,7 @@ public class ApplicationWindow extends JFrame {
                 Track actTrack = songs.get(i);
                 songArray[i] = new ComparableSong(actTrack.getTrackName(),actTrack.getMsPlayed()/1000/60);}
             Arrays.sort(songArray);
-            SortingFrame sortingFrame = new SortingFrame();
-            sortingFrame.add(new JList<>(songArray));
-            sortingFrame.setVisible(true);
+            for(ComparableSong act : songArray){frame.add(act);}
         });
 
         visuals.add(specificArtistGraphs);
@@ -438,25 +422,30 @@ public class ApplicationWindow extends JFrame {
     }
 
     public void refreshSongStats() {
-        centralCanvas.removeAll();
-        centralCanvas.add(new JLabel(generateStatReport(true)));
+        setStatus(generateStatReport(true),true);
         invalidate();
     }
 
     public String generateStatReport(boolean html) {
         return generateStatReport(html, "");
     }
-
-    public String generateStatReport(boolean html, String embed) {
+    public String generateStatReport(boolean html, String embed){
+        return generateStatReport(html,embed,true);
+    }
+    public String generateStatReport(boolean html, String embed, boolean displayGeneratingReport) {
+        if(displayGeneratingReport){
+            setStatus("Generating report...",true);
+            invalidate(); this.repaint();
+        }
         List<Track> songs = songHistory.getListens();
-        if (songs.size() == 0) {
+
+        if (songs.isEmpty()) {
             return ("No songs loaded");
         } else if (songs.size() == 1) {
             return ("1 session currently loaded");
         } else {
             List<Track> individualSongs = songHistory.getSongs();
-            List<String> individualArtists = songHistory.getArtists();
-
+            List<String> individualArtists = songHistory.getArtists(); //these two take too much time
             int totalTimeListenedSeconds = songHistory.getTotalTimeListenedSeconds();
             String ret = "" + songs.size() + " individual sessions loaded.\n " +
                     "With a total of " + individualSongs.size() + " individual songs and " + individualArtists.size() + " individual artists." +
@@ -465,7 +454,6 @@ public class ApplicationWindow extends JFrame {
                 ret = HTMLize(ret);
             }
             return (ret);
-
         }
     }
 
