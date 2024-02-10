@@ -10,6 +10,7 @@ public class Track {
 
     protected String trackName;
     protected String artistName;
+    protected String identifier; //TODO update when necessary
     protected Date endTime;
     protected int msPlayed;
 
@@ -18,6 +19,7 @@ public class Track {
         this.setEndTime(new SimpleDateFormat().parse(Misc.adaptDate(endTime)));
         this.setMsPlayed(msPlayed);
         this.setTrackName(trackName);
+        identifier = artistName + " - " + trackName;
     }
 
     private Track(String trackName, String artistName, Date endTime, int msPlayed) throws ParseException {
@@ -25,6 +27,7 @@ public class Track {
         this.setEndTime(endTime);
         this.setMsPlayed(msPlayed);
         this.setTrackName(trackName);
+        identifier = artistName + " - " + trackName;
     }
 
     public String getTrackName() {

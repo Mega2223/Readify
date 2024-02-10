@@ -33,14 +33,11 @@ public class SongHistory implements Iterable{
 
     public List<String> getArtists(){
         List<String> ret = new ArrayList<>();
-
         for (int i = 0; i < tracks.size(); i++) {
             Track trackAct = tracks.get(i);
             if(!ret.contains(trackAct.artistName)){
                 ret.add(trackAct.artistName);
             }
-
-
         }
         return ret;
     }
@@ -110,14 +107,15 @@ public class SongHistory implements Iterable{
         List<Track> out = new ArrayList<>();
         List<String> buf = new ArrayList<>();
         for (Track act : tracks) {
-            if (!buf.contains(act.trackName)) {
-                Track newTrack = act.clone();
-                newTrack.setMsPlayed((int) getTotalMilisPlayedForSong(act.trackName));
-                out.add(newTrack);
-                buf.add(act.trackName);
+            int index = buf.indexOf(act.identifier);
+            if(index == -1){
+                buf.add(act.identifier);
+                out.add(act);
+            } else {
+                Track cur = out.get(index);
+                cur.setMsPlayed(cur.getMsPlayed() + act.getMsPlayed());
             }
         }
-
         return out;
     }
 
