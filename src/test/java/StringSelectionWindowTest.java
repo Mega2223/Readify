@@ -1,4 +1,4 @@
-import net.mega2223.readify.windows.StringSelector;
+import net.mega2223.readify.windows.arrayselection.StringSelector;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;

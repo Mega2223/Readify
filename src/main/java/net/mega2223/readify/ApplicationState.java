@@ -15,6 +15,7 @@ public class ApplicationState {
     private static final String[] logPriorityNames = {"IMPORTANT","RELEVANT","DEBUG","LOG"};
     public static String importantTaskName = null;
     public static String importantTaskMessage = null;
+    public static int[] imageDimensions = {1000,400};
 
     public static void reportImportantTaskInProgress(String name, String description){
         importantTaskName = name;

@@ -1,5 +1,6 @@
 package net.mega2223.readify.windows;
 
+import net.mega2223.readify.Application;
 import net.mega2223.readify.ApplicationState;
 import net.mega2223.readify.objects.SongHistory;
 import net.mega2223.readify.objects.Track;
@@ -43,6 +44,7 @@ public class ApplicationWindow extends JFrame {
     public JMenu statsJM = new JMenu("Stats");
     public JMenuItem sortArtistsByTimePlayed = new JMenuItem("Sort artists by time played");
     public JMenuItem sortSongsByTimePlayed = new JMenuItem("Sort songs by time played");
+    public JMenuItem showDataOverviewBoard = new JMenuItem("Display data information");
 
     public ApplicationWindow() {
 
@@ -171,9 +173,9 @@ public class ApplicationWindow extends JFrame {
                     double[][][] data = DataInterpreter.genFromASetOfArtists(songHistory,selected, (long) (wideInSecs*1000));
                     JPanel colorIndexPanel = new JPanel(new GridLayout(0, 1));
                     List<Color> colors = genColorList(selected.size());
+                    List<String> text = new ArrayList<>();
                     for (int i = 0; i < selected.size(); i++) {
                         String artist = selected.get(i);
-                        Color act = colors.get(i);
                         String infoDisplay = artist + " (Minutes listened per each TIMEU " + timeUnit.timeUnit.toLowerCase();
                         if(unadaptedAmount != 1.0){infoDisplay += "s";}
                         if(unadaptedAmount == Math.floor(unadaptedAmount)){
@@ -182,23 +184,10 @@ public class ApplicationWindow extends JFrame {
                             infoDisplay = infoDisplay.replace("TIMEU",unadaptedAmount + "");
                         }
                         infoDisplay += ")";
-                        JLabel timeListened = new JLabel(infoDisplay);
-                        timeListened.setIcon(new ImageIcon(Misc.generateMonochromaticImage(10, 10, act)));
-                        timeListened.setHorizontalAlignment(SwingConstants.CENTER);
-                        timeListened.setVerticalTextPosition(SwingConstants.CENTER);
-                        colorIndexPanel.add(timeListened);
+                        text.add(infoDisplay);
                     }
-                    //statusCanvas.add(colorIndexPanel,BorderLayout.WEST);
-                    centralCanvas.removeAll();
-                    JLabel statusLabel = new JLabel();
-                    statusLabel.setIcon(new ImageIcon(GraphGenerator.genFullGraphAndCaptionsFromData(data,new int[]{10,10},bounds[0],bounds[1],currentFont,800,500,colors)));
-                    statusLabel.setText("All data from the selected artists.");
-                    statusLabel.setHorizontalTextPosition(SwingConstants.CENTER);
-                    statusLabel.setVerticalTextPosition(SwingConstants.BOTTOM);
-                    statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
-
-                    centralCanvas.add(statusLabel);
-                    centralCanvas.add(colorIndexPanel);
+                    BufferedImage graph = GraphGenerator.genFullGraphAndCaptionsFromData(data, new int[]{10, 10}, bounds[0], bounds[1], currentFont, Application.imageDimensions[0],Application.imageDimensions[1], colors);
+                    new GraphDisplayWindow("All data from the selected artists.",text,colors,graph);
                     pack();
                 });
             });
@@ -320,6 +309,10 @@ public class ApplicationWindow extends JFrame {
             Arrays.sort(songArray);
             for(ComparableSong act : songArray){frame.add(act);}
         });
+        showDataOverviewBoard.addActionListener(e -> {
+            ApplicationState.checkForOngoingTask(true,true);
+            new DataOverviewBoard(songHistory);
+        });
 
         visuals.add(specificArtistGraphs);
         visuals.add(specificSongGraphs);
@@ -331,6 +324,7 @@ public class ApplicationWindow extends JFrame {
 
         statsJM.add(sortArtistsByTimePlayed);
         statsJM.add(sortSongsByTimePlayed);
+        statsJM.add(showDataOverviewBoard);
 
         jMenuBar.add(importer);
         jMenuBar.add(visuals);
@@ -339,6 +333,7 @@ public class ApplicationWindow extends JFrame {
         BorderLayout layout = new BorderLayout(3, 3);
         //layout.setAlignment(FlowLayout.CENTER);
         setLayout(layout);
+        setLocationRelativeTo(null);
 
         setJMenuBar(jMenuBar);
         centralCanvas.setLayout(new BoxLayout(centralCanvas,BoxLayout.Y_AXIS));

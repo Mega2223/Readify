@@ -44,6 +44,7 @@ public class TimeSpanSelector extends JFrame {
         add(selectButton,BorderLayout.SOUTH);
         pack();
         setVisible(true);
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
 

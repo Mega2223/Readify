@@ -1,4 +1,4 @@
-package net.mega2223.readify.windows;
+package net.mega2223.readify.windows.arrayselection;
 
 import javax.swing.*;
 import java.awt.*;

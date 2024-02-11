@@ -19,7 +19,7 @@ public class Track {
         this.setEndTime(new SimpleDateFormat().parse(Misc.adaptDate(endTime)));
         this.setMsPlayed(msPlayed);
         this.setTrackName(trackName);
-        identifier = artistName + " - " + trackName;
+        updateIdentifier();
     }
 
     private Track(String trackName, String artistName, Date endTime, int msPlayed) throws ParseException {
@@ -27,7 +27,7 @@ public class Track {
         this.setEndTime(endTime);
         this.setMsPlayed(msPlayed);
         this.setTrackName(trackName);
-        identifier = artistName + " - " + trackName;
+        updateIdentifier();
     }
 
     public String getTrackName() {
@@ -35,7 +35,7 @@ public class Track {
     }
 
     public void setTrackName(String trackName) {
-        this.trackName = trackName;
+        this.trackName = trackName; updateIdentifier();
     }
 
     public String getArtistName() {
@@ -43,7 +43,7 @@ public class Track {
     }
 
     public void setArtistName(String artistName) {
-        this.artistName = artistName;
+        this.artistName = artistName; updateIdentifier();
     }
 
     public Date getEndTime() {
@@ -66,6 +66,10 @@ public class Track {
         this.msPlayed = msPlayed;
     }
 
+    public String getIdentifier() {
+        return identifier;
+    }
+
     @Override
     public Track clone(){
         try {
@@ -83,6 +87,10 @@ public class Track {
                 ", endTime=" + endTime +
                 ", msPlayed=" + msPlayed +
                 '}';
+    }
+
+    void updateIdentifier(){
+        identifier = artistName + " - " + trackName;
     }
 
 }

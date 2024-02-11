@@ -58,6 +58,7 @@ public class ArtistSelectionWindow extends JFrame {
         add(centralPanel);
         add(conclusionButton);
         pack();
+        setLocationRelativeTo(null);
         setVisible(true);
     }
 

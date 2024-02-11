@@ -88,7 +88,7 @@ public class SongSelectionWindow extends JFrame {
         });
 
         //init
-
+        setLocationRelativeTo(null);
         setVisible(true);
         pack();
         this.invalidate();
